@@ -1,0 +1,19 @@
+
+
+        //File dir = new File(externalStorageDirectory.getAbsolutePath() + "/tesseract/");
+        /*if (!appDir.isDirectory())
+            appDir.mkdir();
+
+        final File baseDir = new File(appDir, "tessdata");
+        if (!baseDir.isDirectory())
+            baseDir.mkdir();
+*/
+
+//baseAPI.init(externalStorageDirectory+"/tesseract/", "hin");
+       // Typeface hindi=Typeface.createFromAsset(getAssets(),"Kruti_Dev_040__Thin.ttf");
+      //  tv.setTypeface(hindi);
+
+       // renderIntent.putExtra("image",bs.toByteArray());
+
+//Toast.makeText(this, text, Toast.LENGTH_LONG).show();
+//bitmap.recycle();
