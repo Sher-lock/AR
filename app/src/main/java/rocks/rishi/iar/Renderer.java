@@ -27,7 +27,8 @@ import rajawali.renderer.RajawaliRenderer;
 
 public class Renderer extends RajawaliRenderer {
     private Bitmap newBit;
-    private String text;
+    String text;
+
     public Bitmap textAsBitmap(String text, int textsize, int color) {
         Paint paint = new Paint();
         paint.setTextSize(textsize);
@@ -45,23 +46,24 @@ public class Renderer extends RajawaliRenderer {
         return image;
     }
 
-    public Renderer(Context context,Bitmap bit,String text) {
+    public Renderer(Context context,Bitmap bit,String text1) {
         super(context);
         setFrameRate(60);
         newBit=bit;
         setCamera(new Camera2D());
         //  setFrameRate(30);
-        this.text=text;
+        text=text1;
+       // Log.e("text in render error==",""+text.toString());
         mTime = 0;
     }
 
     private float mTime;
 
-    Plane cube;
+    Plane back,front;
     protected void initScene() {
 
-        Translate.setClientId("IndiAR"); //Change this
-        Translate.setClientSecret("63KlfJGAQAW8i/q1RWJjm+1qFzgYXQ3gBt7PSjhQqKs="); //change
+        Translate.setClientId("IndiAR");
+        Translate.setClientSecret("63KlfJGAQAW8i/q1RWJjm+1qFzgYXQ3gBt7PSjhQqKs=");
 
 
         String translatedText = "";
@@ -70,19 +72,37 @@ public class Renderer extends RajawaliRenderer {
             translatedText=Translate.execute(text,Language.HINDI,Language.ENGLISH);
         } catch (Exception e) {
             e.printStackTrace();
+            Log.e("==error==",""+e.toString());
+
         }
 
 
-        SimpleMaterial material = new SimpleMaterial();
-        Bitmap bg = textAsBitmap(translatedText,30,Color.rgb(0,0,0));
-        cube = new Plane(1, 1, 1, 1, 1);
-        cube.setMaterial(material);
-        cube.setScale(1f, 0.8f, 0f);
+        Log.e("translated==",""+translatedText.toString());
 
-        cube.addTexture(mTextureManager.addTexture(bg));
+        SimpleMaterial background = new SimpleMaterial();
+        SimpleMaterial foreground = new SimpleMaterial();
 
-        addChild(cube);
-        mCamera.setZ(5f);
+        //size of the text is static
+        Bitmap fg = textAsBitmap(translatedText,40,Color.rgb(0,0,0));
+        Bitmap bg = newBit;
+
+
+
+        back = new Plane(1, 1, 1, 1, 1);
+        front = new Plane(1, 1, 1, 1, 1);
+
+        //currently scaling is static
+        front.setScale(.8f, .3f, 0f);
+
+        back.setMaterial(background);
+        front.setMaterial(foreground);
+
+        front.addTexture(mTextureManager.addTexture(fg));
+        back.addTexture(mTextureManager.addTexture(bg));
+
+        addChild(front);
+        addChild(back);
+  //      mCamera.setZ(5f);
     }
 
     public void onDrawFrame(GL10 glUnused) {

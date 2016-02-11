@@ -17,7 +17,8 @@ public class DoTheRender extends RajawaliActivity{
     private Renderer mRenderer;
     private String text;
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
         Intent intent = getIntent();
         Bitmap bitmap =MainActivity.getBitmap();
@@ -25,6 +26,7 @@ public class DoTheRender extends RajawaliActivity{
         mRenderer = new Renderer(this,bitmap,text);
         mRenderer.setSurfaceView(mSurfaceView);
         super.setRenderer(mRenderer);
+
         }
     }
 
