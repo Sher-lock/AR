@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -52,7 +53,7 @@ public class MainActivity extends ActionBarActivity {
     private Mat originalMat;
     private Bitmap currentBitmap;
     private ImageView img;
-
+    public static String Rectangles;
     private BaseLoaderCallback mOpenCVCallBack = new
             BaseLoaderCallback(this) {
                 @Override
@@ -171,6 +172,9 @@ public class MainActivity extends ActionBarActivity {
         return bitmap;
     }
 
+    public static String getRectangles(){
+        return Rectangles;
+    }
 
     private void inspectFromBitmap() {
 
@@ -180,6 +184,9 @@ public class MainActivity extends ActionBarActivity {
         baseAPI.setPageSegMode(100);//100
         baseAPI.setPageSegMode(3);
         baseAPI.setImage(currentBitmap);
+        baseAPI.getWords().getBoxRects().get(0);
+        Log.e("RECTANGLES ARE ", "" + baseAPI.getWords().getBoxRects().toString());
+        Log.e("First RECTANGLE is ",""+baseAPI.getWords().getBoxRects().get(0).toString());
         tv.setText(baseAPI.getUTF8Text());
         Log.e("this is the text",""+tv.getText().toString());
         Log.d("HINDI=====>>", tv.getText().toString());
@@ -189,6 +196,10 @@ public class MainActivity extends ActionBarActivity {
 
         Intent renderIntent=new Intent(MainActivity.this,DoTheRender.class);
         renderIntent.putExtra("string", tv.getText().toString());
+        Rectangles = baseAPI.getWords().getBoxRects().toString();
+        //renderIntent.putExtra("Rectangles",baseAPI.getWords().getBoxRects().toString());
+       // renderIntent.putStringArrayListExtra("Rectangles",baseAPI.getWords().getBoxRects());
+        renderIntent.putExtra("FirstRectangle",baseAPI.getWords().getBoxRects().get(0).toString());
         startActivity(renderIntent);
     }
 

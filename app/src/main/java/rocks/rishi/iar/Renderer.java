@@ -27,7 +27,8 @@ import rajawali.renderer.RajawaliRenderer;
 
 public class Renderer extends RajawaliRenderer {
     private Bitmap newBit;
-    String text;
+    int pixel,R,G,B;
+    String text,Rectangles,FirstRectangle;
 
     public Bitmap textAsBitmap(String text, int textsize, int color) {
         Paint paint = new Paint();
@@ -37,7 +38,7 @@ public class Renderer extends RajawaliRenderer {
 
         Bitmap newbi=Bitmap.createBitmap(newBit,0,0,newBit.getWidth(),newBit.getHeight());
         Bitmap image=newbi.copy(Bitmap.Config.ARGB_8888, true);
-        image.eraseColor(Color.rgb(255,255,255));
+        image.eraseColor(Color.rgb(R,G,B));
 
         Canvas canvas = new Canvas(image);
         paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
@@ -46,13 +47,21 @@ public class Renderer extends RajawaliRenderer {
         return image;
     }
 
-    public Renderer(Context context,Bitmap bit,String text1) {
+    public Renderer(Context context,Bitmap bit,String text1,String temp_Rectangles,String temp_FirstRectangle) {
         super(context);
         setFrameRate(60);
         newBit=bit;
+        pixel = bit.getPixel(Integer.parseInt(temp_FirstRectangle.substring(5,temp_FirstRectangle.indexOf(',')))-1,Integer.parseInt(temp_FirstRectangle.substring(temp_FirstRectangle.indexOf(' ')+1,temp_FirstRectangle.indexOf('-')-1)));
+        Log.e("Dynamic coordinates = ",""+Integer.parseInt(temp_FirstRectangle.substring(temp_FirstRectangle.indexOf(' ')+1,temp_FirstRectangle.indexOf('-')-1)));
+
+        R = (pixel & 0xff0000) >> 16;
+         G = (pixel & 0xff00) >> 8;
+         B = pixel & 0xff;
         setCamera(new Camera2D());
         //  setFrameRate(30);
         text=text1;
+        Rectangles=temp_Rectangles;
+        FirstRectangle=temp_FirstRectangle;
        // Log.e("text in render error==",""+text.toString());
         mTime = 0;
     }
@@ -69,6 +78,8 @@ public class Renderer extends RajawaliRenderer {
         String translatedText = "";
 
         try {
+            Log.e("before translation= ",""+text);
+
             translatedText=Translate.execute(text,Language.HINDI,Language.ENGLISH);
         } catch (Exception e) {
             e.printStackTrace();
@@ -76,9 +87,10 @@ public class Renderer extends RajawaliRenderer {
 
         }
 
-
-        Log.e("translated==",""+translatedText.toString());
-
+        Log.e("translated==",""+translatedText.toString()+"  "+Rectangles+"  "+FirstRectangle);
+        Log.e("String RECTANGLES ARE ",""+Rectangles);
+        Log.e("StrFirstRECTANGLE is ",""+FirstRectangle);
+        Log.e("pixel is ",""+pixel);
         SimpleMaterial background = new SimpleMaterial();
         SimpleMaterial foreground = new SimpleMaterial();
 

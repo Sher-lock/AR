@@ -15,7 +15,7 @@ import rajawali.RajawaliActivity;
  */
 public class DoTheRender extends RajawaliActivity{
     private Renderer mRenderer;
-    private String text;
+    private String text,Rectangles,FirstRectangle;
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
@@ -23,7 +23,9 @@ public class DoTheRender extends RajawaliActivity{
         Intent intent = getIntent();
         Bitmap bitmap =MainActivity.getBitmap();
         text=intent.getStringExtra("string");
-        mRenderer = new Renderer(this,bitmap,text);
+        Rectangles=MainActivity.getRectangles();
+        FirstRectangle=intent.getStringExtra("FirstRectangle");
+        mRenderer = new Renderer(this,bitmap,text,Rectangles,FirstRectangle);
         mRenderer.setSurfaceView(mSurfaceView);
         super.setRenderer(mRenderer);
 
