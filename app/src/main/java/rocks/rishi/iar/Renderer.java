@@ -51,7 +51,7 @@ public class Renderer extends RajawaliRenderer {
         super(context);
         setFrameRate(60);
         newBit=bit;
-        pixel = bit.getPixel(Integer.parseInt(temp_FirstRectangle.substring(5,temp_FirstRectangle.indexOf(',')))-1,Integer.parseInt(temp_FirstRectangle.substring(temp_FirstRectangle.indexOf(' ')+1,temp_FirstRectangle.indexOf('-')-1)));
+        pixel = bit.getPixel(Integer.parseInt(temp_FirstRectangle.substring(5,temp_FirstRectangle.indexOf(',')))-5,Integer.parseInt(temp_FirstRectangle.substring(temp_FirstRectangle.indexOf(' ')+1,temp_FirstRectangle.indexOf('-')-1)));
         Log.e("Dynamic coordinates = ",""+Integer.parseInt(temp_FirstRectangle.substring(temp_FirstRectangle.indexOf(' ')+1,temp_FirstRectangle.indexOf('-')-1)));
 
         R = (pixel & 0xff0000) >> 16;
@@ -104,8 +104,13 @@ public class Renderer extends RajawaliRenderer {
         front = new Plane(1, 1, 1, 1, 1);
 
         //currently scaling is static
-        front.setScale(.8f, .3f, 0f);
-
+        front.setScale(.8f,.3f, 0f);
+//        front.setX(55);
+        //front.setPosition(.8f,.3f, 0f);
+//        front.setY(116);
+//        front.setZ(0);
+        //front.setPosition(55,116,0);
+        //front.setScreenCoordinates(55,116,50,60,0);
         back.setMaterial(background);
         front.setMaterial(foreground);
 
