@@ -36,33 +36,36 @@ public class Renderer extends RajawaliRenderer {
         paint.setColor(color);
         paint.setTextAlign(Paint.Align.CENTER);
 
-        Bitmap newbi=Bitmap.createBitmap(newBit,0,0,newBit.getWidth(),newBit.getHeight());
+        Bitmap newbi=Bitmap.createBitmap(newBit, 0,0,135,28);   //height,width of rect
         Bitmap image=newbi.copy(Bitmap.Config.ARGB_8888, true);
-        image.eraseColor(Color.rgb(R,G,B));
+//        image.eraseColor(Color.rgb(R,G,B));
+        image.eraseColor(Color.rgb(255,255,255));
 
         Canvas canvas = new Canvas(image);
         paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
-        canvas.drawText(text,newBit.getWidth()/2, newBit.getHeight()/2, paint);
+        canvas.drawText(text, newbi.getWidth()/2, newbi.getHeight()/2, paint);
 
         return image;
     }
 
-    public Renderer(Context context,Bitmap bit,String text1,String temp_Rectangles,String temp_FirstRectangle) {
+    public Renderer(Context context,Bitmap bit,String text1,String Rectangle) {
         super(context);
         setFrameRate(60);
         newBit=bit;
-        pixel = bit.getPixel(Integer.parseInt(temp_FirstRectangle.substring(5,temp_FirstRectangle.indexOf(',')))-5,Integer.parseInt(temp_FirstRectangle.substring(temp_FirstRectangle.indexOf(' ')+1,temp_FirstRectangle.indexOf('-')-1)));
-        Log.e("Dynamic coordinates = ",""+Integer.parseInt(temp_FirstRectangle.substring(temp_FirstRectangle.indexOf(' ')+1,temp_FirstRectangle.indexOf('-')-1)));
+        pixel = bit.getPixel(Integer.parseInt(Rectangle.substring(6,Rectangle.indexOf(',')))-5,
+                Integer.parseInt(Rectangle.substring(Rectangle.indexOf(' ')+1,Rectangle.indexOf('-')-1)));
+        Log.e("------RECTANGLE",""+Integer.parseInt(Rectangle.substring(Rectangle.indexOf(' ')+1,
+                Rectangle.indexOf('-')-1)));
 
         R = (pixel & 0xff0000) >> 16;
-         G = (pixel & 0xff00) >> 8;
-         B = pixel & 0xff;
+        G = (pixel & 0xff00) >> 8;
+        B = pixel & 0xff;
         setCamera(new Camera2D());
         //  setFrameRate(30);
         text=text1;
-        Rectangles=temp_Rectangles;
-        FirstRectangle=temp_FirstRectangle;
-       // Log.e("text in render error==",""+text.toString());
+        Rectangles=Rectangle;
+        //Rectangle=Rectangles;
+      // Log.e("text in render error==",""+Rec.toString());
         mTime = 0;
     }
 
@@ -95,31 +98,30 @@ public class Renderer extends RajawaliRenderer {
         SimpleMaterial foreground = new SimpleMaterial();
 
         //size of the text is static
-        Bitmap fg = textAsBitmap(translatedText,40,Color.rgb(0,0,0));
+        Bitmap fg = textAsBitmap(translatedText,15,Color.rgb(0,0,0));
         Bitmap bg = newBit;
 
+        back = new Plane(0.001f*bg.getWidth(),0.001f*bg.getHeight(), 1, 1);
+        //front = new Plane(1, 1, 1, 1, 1);
+        front = new Plane(0.135f, .028f, 1, 1);      //height,width of rect
 
-
-        back = new Plane(1, 1, 1, 1, 1);
-        front = new Plane(1, 1, 1, 1, 1);
-
+        front.setX(0.018f);
+        front.setY(0.106f);
         //currently scaling is static
-        front.setScale(.8f,.3f, 0f);
+   //     front.setScale(.8f,.3f, 0f);
 //        front.setX(55);
         //front.setPosition(.8f,.3f, 0f);
 //        front.setY(116);
 //        front.setZ(0);
-        //front.setPosition(55,116,0);
         //front.setScreenCoordinates(55,116,50,60,0);
         back.setMaterial(background);
         front.setMaterial(foreground);
 
         front.addTexture(mTextureManager.addTexture(fg));
         back.addTexture(mTextureManager.addTexture(bg));
-
+      //  mCamera.setZ(-5f);
         addChild(front);
         addChild(back);
-  //      mCamera.setZ(5f);
     }
 
     public void onDrawFrame(GL10 glUnused) {

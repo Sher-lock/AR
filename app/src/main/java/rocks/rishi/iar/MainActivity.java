@@ -94,7 +94,7 @@ public class MainActivity extends ActionBarActivity {
         File externalStorageDirectory = Environment.getExternalStorageDirectory();
 
         //to increase the accuracy of tesseract OEM_TESSERACT_CUBE_COMBINED is used
-        baseAPI.init("/storage/sdcard1/tesseract/", "hin",TessBaseAPI.OEM_TESSERACT_CUBE_COMBINED);
+        baseAPI.init("/storage/9016-4EF8/tesseract/", "hin",TessBaseAPI.OEM_TESSERACT_CUBE_COMBINED);
        // baseAPI.init("/storage/sdcard/tesseract/", "hin",TessBaseAPI.OEM_TESSERACT_CUBE_COMBINED);
         Log.e("in Mainactivity", "on create");
 
@@ -184,9 +184,6 @@ public class MainActivity extends ActionBarActivity {
         baseAPI.setPageSegMode(100);//100
         baseAPI.setPageSegMode(3);
         baseAPI.setImage(currentBitmap);
-        baseAPI.getWords().getBoxRects().get(0);
-        Log.e("RECTANGLES ARE ", "" + baseAPI.getWords().getBoxRects().toString());
-        Log.e("First RECTANGLE is ",""+baseAPI.getWords().getBoxRects().get(0).toString());
         tv.setText(baseAPI.getUTF8Text());
         Log.e("this is the text",""+tv.getText().toString());
         Log.d("HINDI=====>>", tv.getText().toString());
@@ -196,8 +193,10 @@ public class MainActivity extends ActionBarActivity {
 
         Intent renderIntent=new Intent(MainActivity.this,DoTheRender.class);
         renderIntent.putExtra("string", tv.getText().toString());
-        Rectangles = baseAPI.getWords().getBoxRects().toString();
-        //renderIntent.putExtra("Rectangles",baseAPI.getWords().getBoxRects().toString());
+        //Rectangles = baseAPI.getWords().getBoxRects().toString();
+        Rectangles = baseAPI.getTextlines().getBoxRects().toString();
+        Log.e("---RECTANGLES ARE ", "" + Rectangles);
+        renderIntent.putExtra("Rectangles",Rectangles);
        // renderIntent.putStringArrayListExtra("Rectangles",baseAPI.getWords().getBoxRects());
         renderIntent.putExtra("FirstRectangle",baseAPI.getWords().getBoxRects().get(0).toString());
         startActivity(renderIntent);

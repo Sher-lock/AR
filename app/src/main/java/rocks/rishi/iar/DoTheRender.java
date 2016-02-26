@@ -23,9 +23,9 @@ public class DoTheRender extends RajawaliActivity{
         Intent intent = getIntent();
         Bitmap bitmap =MainActivity.getBitmap();
         text=intent.getStringExtra("string");
-        Rectangles=MainActivity.getRectangles();
+        Rectangles=intent.getStringExtra("Rectangles");
         FirstRectangle=intent.getStringExtra("FirstRectangle");
-        mRenderer = new Renderer(this,bitmap,text,Rectangles,FirstRectangle);
+        mRenderer = new Renderer(this,bitmap,text,Rectangles);
         mRenderer.setSurfaceView(mSurfaceView);
         super.setRenderer(mRenderer);
 
