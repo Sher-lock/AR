@@ -32,15 +32,11 @@ import rajawali.renderer.RajawaliRenderer;
 
 public class Renderer extends RajawaliRenderer {
     private Bitmap newBit;
-<<<<<<< HEAD
-    int pixel,R,G,B, rect_width, rect_height;
-    String text,Rectangles,FirstRectangle;
-    Camera2D camera2D;;
-=======
+
     int pixel,R,G,B;
     String text;
-    private ArrayList<Rect> rectArrayList;
->>>>>>> 49998382e804961fdadafe24579bd5ffd7ceece8
+    Camera2D camera2D;;
+    private ArrayList<Rect> rectArrayList,line_rect_list;
 
     public Bitmap textAsBitmap(String text, int textsize, int color) {
         Paint paint = new Paint();
@@ -48,7 +44,7 @@ public class Renderer extends RajawaliRenderer {
         paint.setColor(color);
         paint.setTextAlign(Paint.Align.CENTER);
 
-        Bitmap newbi=Bitmap.createBitmap(newBit, 0,0,190,42);   //height,width of rect
+        Bitmap newbi=Bitmap.createBitmap(newBit, 0,0,line_rect_list.get(0).width(),line_rect_list.get(0).height());   //height,width of rect
         Bitmap image=newbi.copy(Bitmap.Config.ARGB_8888, true);
         image.eraseColor(Color.rgb(R,G,B));
         //image.eraseColor(Color.rgb(255,255,255));
@@ -60,7 +56,7 @@ public class Renderer extends RajawaliRenderer {
         return image;
     }
 
-    public Renderer(Context context,Bitmap bit,String text1,ArrayList<Rect> rect) {
+    public Renderer(Context context,Bitmap bit,String text1,ArrayList<Rect> rect,ArrayList<Rect> line_rect) {
         super(context);
         setFrameRate(60);
         camera2D = new Camera2D();
@@ -74,16 +70,12 @@ public class Renderer extends RajawaliRenderer {
         R = (pixel & 0xff0000) >> 16;
         G = (pixel & 0xff00) >> 8;
         B = pixel & 0xff;
-<<<<<<< HEAD
-      //  setCamera(new Camera2D());
-        //  setFrameRate(30);
-=======
+
         setCamera(new Camera2D());
 
->>>>>>> 49998382e804961fdadafe24579bd5ffd7ceece8
         text=text1;
         rectArrayList=rect;
-
+        line_rect_list=line_rect;
         mTime = 0;
     }
 
@@ -106,7 +98,7 @@ public class Renderer extends RajawaliRenderer {
 
         }
 
-        Log.e("translated==",""+translatedText.toString()+"  "+rectArrayList.toString());
+        Log.e("translated==",""+translatedText.toString()+"  "+rectArrayList.toString()+line_rect_list.toString()+(float)(0.001*line_rect_list.get(0).top));
         Log.e("pixel is ",""+pixel);
         SimpleMaterial background = new SimpleMaterial();
         SimpleMaterial foreground = new SimpleMaterial();
@@ -120,9 +112,10 @@ public class Renderer extends RajawaliRenderer {
         Log.e("--##dim",""+bg.getWidth()+" "+bg.getHeight());
         front = new Plane(1, 1, 1, 1, 1);
 
-        front.setScale(200.0f/bg.getWidth(),45.0f/bg.getHeight(),0);
-        front.setPosition(0.312f,.512f/2.0f-.008f/2.0f,0);
+        front.setScale((float)line_rect_list.get(0).width()/bg.getWidth(),(float)line_rect_list.get(0).height()/bg.getHeight(),0);
+        front.setPosition((float)(0.001*line_rect_list.get(0).left),.512f/2.0f-(float)(0.001*line_rect_list.get(0).top)/2.0f,0);
 
+        //front.setPosition(0.5f,0.5f,0);
         back.setMaterial(background);
         front.setMaterial(foreground);
         front.addTexture(mTextureManager.addTexture(fg));

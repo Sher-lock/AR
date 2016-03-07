@@ -20,7 +20,7 @@ import rajawali.RajawaliActivity;
 public class DoTheRender extends RajawaliActivity{
     private Renderer mRenderer;
     private String text,FirstRectangle;
-    private ArrayList<android.graphics.Rect> rect;
+    private ArrayList<android.graphics.Rect> rect,line_rect;
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
@@ -29,8 +29,9 @@ public class DoTheRender extends RajawaliActivity{
         Bitmap bitmap =MainActivity.getBitmap();
         text=intent.getStringExtra("string");
         rect=MainActivity.getRectangles();
+        line_rect=MainActivity.getLineRectangles();
         FirstRectangle=intent.getStringExtra("FirstRectangle");
-        mRenderer = new Renderer(this,bitmap,text,rect);
+        mRenderer = new Renderer(this,bitmap,text,rect,line_rect);
         mRenderer.setSurfaceView(mSurfaceView);
         super.setRenderer(mRenderer);
 

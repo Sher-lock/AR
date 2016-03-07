@@ -54,7 +54,7 @@ public class MainActivity extends ActionBarActivity {
     private Mat originalMat;
     private Bitmap currentBitmap;
     private ImageView img;
-    private static ArrayList<Rect> rect;
+    private static ArrayList<Rect> rect,line_rect;
     //public static String Rectangles;
     private BaseLoaderCallback mOpenCVCallBack = new
             BaseLoaderCallback(this) {
@@ -96,7 +96,7 @@ public class MainActivity extends ActionBarActivity {
         File externalStorageDirectory = Environment.getExternalStorageDirectory();
 
         //to increase the accuracy of tesseract OEM_TESSERACT_CUBE_COMBINED is used
-        baseAPI.init("/storage/9016-4EF8/tesseract/", "hin",TessBaseAPI.OEM_TESSERACT_CUBE_COMBINED);
+        baseAPI.init(Environment.getExternalStorageDirectory()+"/tesseract/", "hin",TessBaseAPI.OEM_TESSERACT_CUBE_COMBINED);
        //baseAPI.init("/storage/sdcard1/tesseract/", "hin",TessBaseAPI.OEM_TESSERACT_CUBE_COMBINED);
         Log.e("in Mainactivity", "on create");
 
@@ -180,6 +180,11 @@ public class MainActivity extends ActionBarActivity {
         return rect;
     }
 
+    public static ArrayList<Rect> getLineRectangles(){
+        //return Rectangles;
+        return line_rect;
+    }
+
     private void inspectFromBitmap() {
 
         Log.e("in Mainactivity", "inspect from bitmap");
@@ -198,9 +203,11 @@ public class MainActivity extends ActionBarActivity {
         Intent renderIntent=new Intent(MainActivity.this,DoTheRender.class);
         renderIntent.putExtra("string", tv.getText().toString());
         rect=baseAPI.getWords().getBoxRects();
-
+        line_rect=baseAPI.getTextlines().getBoxRects();
         //Rectangles = baseAPI.getTextlines().getBoxRects().toString();
         Log.e("---RECTANGLES ARE ", "" + rect.toString());
+        Log.e("---Line Rectangles ARE ", "" + line_rect.toString());
+
         //renderIntent.putExtra("Rectangles",Rectangles);
 
 
