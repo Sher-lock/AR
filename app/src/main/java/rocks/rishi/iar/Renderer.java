@@ -17,6 +17,7 @@ import org.opencv.imgproc.Imgproc;
 import javax.microedition.khronos.opengles.GL10;
 
 import rajawali.Camera2D;
+import rajawali.OrthographicCamera;
 import rajawali.materials.SimpleMaterial;
 import rajawali.primitives.Plane;
 import rajawali.renderer.RajawaliRenderer;
@@ -27,8 +28,9 @@ import rajawali.renderer.RajawaliRenderer;
 
 public class Renderer extends RajawaliRenderer {
     private Bitmap newBit;
-    int pixel,R,G,B;
+    int pixel,R,G,B, rect_width, rect_height;
     String text,Rectangles,FirstRectangle;
+    Camera2D camera2D;;
 
     public Bitmap textAsBitmap(String text, int textsize, int color) {
         Paint paint = new Paint();
@@ -36,7 +38,7 @@ public class Renderer extends RajawaliRenderer {
         paint.setColor(color);
         paint.setTextAlign(Paint.Align.CENTER);
 
-        Bitmap newbi=Bitmap.createBitmap(newBit, 0,0,135,28);   //height,width of rect
+        Bitmap newbi=Bitmap.createBitmap(newBit, 0,0,190,42);   //height,width of rect
         Bitmap image=newbi.copy(Bitmap.Config.ARGB_8888, true);
 //        image.eraseColor(Color.rgb(R,G,B));
         image.eraseColor(Color.rgb(255,255,255));
@@ -51,6 +53,8 @@ public class Renderer extends RajawaliRenderer {
     public Renderer(Context context,Bitmap bit,String text1,String Rectangle) {
         super(context);
         setFrameRate(60);
+        camera2D = new Camera2D();
+        this.setCamera(this.camera2D);
         newBit=bit;
         pixel = bit.getPixel(Integer.parseInt(Rectangle.substring(6,Rectangle.indexOf(',')))-5,
                 Integer.parseInt(Rectangle.substring(Rectangle.indexOf(' ')+1,Rectangle.indexOf('-')-1)));
@@ -60,7 +64,7 @@ public class Renderer extends RajawaliRenderer {
         R = (pixel & 0xff0000) >> 16;
         G = (pixel & 0xff00) >> 8;
         B = pixel & 0xff;
-        setCamera(new Camera2D());
+      //  setCamera(new Camera2D());
         //  setFrameRate(30);
         text=text1;
         Rectangles=Rectangle;
@@ -76,8 +80,6 @@ public class Renderer extends RajawaliRenderer {
 
         Translate.setClientId("IndiAR");
         Translate.setClientSecret("63KlfJGAQAW8i/q1RWJjm+1qFzgYXQ3gBt7PSjhQqKs=");
-
-
         String translatedText = "";
 
         try {
@@ -96,30 +98,23 @@ public class Renderer extends RajawaliRenderer {
         Log.e("pixel is ",""+pixel);
         SimpleMaterial background = new SimpleMaterial();
         SimpleMaterial foreground = new SimpleMaterial();
-
         //size of the text is static
-        Bitmap fg = textAsBitmap(translatedText,15,Color.rgb(0,0,0));
+        Bitmap fg = textAsBitmap(translatedText,20,Color.rgb(0,0,0));
         Bitmap bg = newBit;
 
-        back = new Plane(0.001f*bg.getWidth(),0.001f*bg.getHeight(), 1, 1);
-        //front = new Plane(1, 1, 1, 1, 1);
-        front = new Plane(0.135f, .028f, 1, 1);      //height,width of rect
+        //this.camera2D.setZ(50f);
 
-        front.setX(0.018f);
-        front.setY(0.106f);
-        //currently scaling is static
-   //     front.setScale(.8f,.3f, 0f);
-//        front.setX(55);
-        //front.setPosition(.8f,.3f, 0f);
-//        front.setY(116);
-//        front.setZ(0);
-        //front.setScreenCoordinates(55,116,50,60,0);
+        back = new Plane(1, 1, 1, 1, 1);
+        Log.e("--##dim",""+bg.getWidth()+" "+bg.getHeight());
+        front = new Plane(1, 1, 1, 1, 1);
+
+        front.setScale(200.0f/bg.getWidth(),45.0f/bg.getHeight(),0);
+        front.setPosition(0.312f,.512f/2.0f-.008f/2.0f,0);
+
         back.setMaterial(background);
         front.setMaterial(foreground);
-
         front.addTexture(mTextureManager.addTexture(fg));
         back.addTexture(mTextureManager.addTexture(bg));
-      //  mCamera.setZ(-5f);
         addChild(front);
         addChild(back);
     }

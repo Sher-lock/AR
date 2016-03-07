@@ -168,7 +168,8 @@ public class MainActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public static Bitmap getBitmap(){
+    public static Bitmap getBitmap()
+    {
         return bitmap;
     }
 
@@ -267,7 +268,7 @@ public class MainActivity extends ActionBarActivity {
             is = getContentResolver().openInputStream(uri);
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-            options.inSampleSize = 2;
+            options.inSampleSize = 0;
             options.inScreenDensity = DisplayMetrics.DENSITY_LOW;
             bitmap = BitmapFactory.decodeStream(is, null, options);
 
@@ -276,7 +277,6 @@ public class MainActivity extends ActionBarActivity {
             Bitmap decoded = BitmapFactory.decodeStream(new ByteArrayInputStream(out.toByteArray()));
 
             bitmap=decoded;
-
 
             Bitmap tempBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
             originalMat = new Mat(tempBitmap.getHeight(), tempBitmap.getWidth(), CvType.CV_8U);
