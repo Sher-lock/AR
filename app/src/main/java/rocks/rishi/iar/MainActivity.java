@@ -41,6 +41,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 
 public class MainActivity extends ActionBarActivity {
     private static final int REQUEST_GALLERY = 0;
@@ -53,7 +54,8 @@ public class MainActivity extends ActionBarActivity {
     private Mat originalMat;
     private Bitmap currentBitmap;
     private ImageView img;
-    public static String Rectangles;
+    private static ArrayList<Rect> rect;
+    //public static String Rectangles;
     private BaseLoaderCallback mOpenCVCallBack = new
             BaseLoaderCallback(this) {
                 @Override
@@ -95,7 +97,7 @@ public class MainActivity extends ActionBarActivity {
 
         //to increase the accuracy of tesseract OEM_TESSERACT_CUBE_COMBINED is used
         baseAPI.init("/storage/9016-4EF8/tesseract/", "hin",TessBaseAPI.OEM_TESSERACT_CUBE_COMBINED);
-       // baseAPI.init("/storage/sdcard/tesseract/", "hin",TessBaseAPI.OEM_TESSERACT_CUBE_COMBINED);
+       //baseAPI.init("/storage/sdcard1/tesseract/", "hin",TessBaseAPI.OEM_TESSERACT_CUBE_COMBINED);
         Log.e("in Mainactivity", "on create");
 
         //this if the user chooses a photo from gallery
@@ -173,8 +175,9 @@ public class MainActivity extends ActionBarActivity {
         return bitmap;
     }
 
-    public static String getRectangles(){
-        return Rectangles;
+    public static ArrayList<Rect> getRectangles(){
+        //return Rectangles;
+        return rect;
     }
 
     private void inspectFromBitmap() {
@@ -194,10 +197,13 @@ public class MainActivity extends ActionBarActivity {
 
         Intent renderIntent=new Intent(MainActivity.this,DoTheRender.class);
         renderIntent.putExtra("string", tv.getText().toString());
-        //Rectangles = baseAPI.getWords().getBoxRects().toString();
-        Rectangles = baseAPI.getTextlines().getBoxRects().toString();
-        Log.e("---RECTANGLES ARE ", "" + Rectangles);
-        renderIntent.putExtra("Rectangles",Rectangles);
+        rect=baseAPI.getWords().getBoxRects();
+
+        //Rectangles = baseAPI.getTextlines().getBoxRects().toString();
+        Log.e("---RECTANGLES ARE ", "" + rect.toString());
+        //renderIntent.putExtra("Rectangles",Rectangles);
+
+
        // renderIntent.putStringArrayListExtra("Rectangles",baseAPI.getWords().getBoxRects());
         renderIntent.putExtra("FirstRectangle",baseAPI.getWords().getBoxRects().get(0).toString());
         startActivity(renderIntent);

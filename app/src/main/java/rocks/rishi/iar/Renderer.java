@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.util.Log;
 
@@ -13,6 +14,9 @@ import com.memetix.mst.language.Language;
 import com.memetix.mst.translate.Translate;
 
 import org.opencv.imgproc.Imgproc;
+
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 
 import javax.microedition.khronos.opengles.GL10;
 
@@ -28,9 +32,15 @@ import rajawali.renderer.RajawaliRenderer;
 
 public class Renderer extends RajawaliRenderer {
     private Bitmap newBit;
+<<<<<<< HEAD
     int pixel,R,G,B, rect_width, rect_height;
     String text,Rectangles,FirstRectangle;
     Camera2D camera2D;;
+=======
+    int pixel,R,G,B;
+    String text;
+    private ArrayList<Rect> rectArrayList;
+>>>>>>> 49998382e804961fdadafe24579bd5ffd7ceece8
 
     public Bitmap textAsBitmap(String text, int textsize, int color) {
         Paint paint = new Paint();
@@ -40,8 +50,8 @@ public class Renderer extends RajawaliRenderer {
 
         Bitmap newbi=Bitmap.createBitmap(newBit, 0,0,190,42);   //height,width of rect
         Bitmap image=newbi.copy(Bitmap.Config.ARGB_8888, true);
-//        image.eraseColor(Color.rgb(R,G,B));
-        image.eraseColor(Color.rgb(255,255,255));
+        image.eraseColor(Color.rgb(R,G,B));
+        //image.eraseColor(Color.rgb(255,255,255));
 
         Canvas canvas = new Canvas(image);
         paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
@@ -50,26 +60,30 @@ public class Renderer extends RajawaliRenderer {
         return image;
     }
 
-    public Renderer(Context context,Bitmap bit,String text1,String Rectangle) {
+    public Renderer(Context context,Bitmap bit,String text1,ArrayList<Rect> rect) {
         super(context);
         setFrameRate(60);
         camera2D = new Camera2D();
         this.setCamera(this.camera2D);
         newBit=bit;
-        pixel = bit.getPixel(Integer.parseInt(Rectangle.substring(6,Rectangle.indexOf(',')))-5,
-                Integer.parseInt(Rectangle.substring(Rectangle.indexOf(' ')+1,Rectangle.indexOf('-')-1)));
-        Log.e("------RECTANGLE",""+Integer.parseInt(Rectangle.substring(Rectangle.indexOf(' ')+1,
-                Rectangle.indexOf('-')-1)));
-
+       // pixel = bit.getPixel(Integer.parseInt(Rectangle.substring(6,Rectangle.indexOf(',')))-5,
+        //        Integer.parseInt(Rectangle.substring(Rectangle.indexOf(' ')+1,Rectangle.indexOf('-')-1)));
+        //Log.e("------RECTANGLE",""+Integer.parseInt(Rectangle.substring(Rectangle.indexOf(' ')+1,
+         //       Rectangle.indexOf('-')-1)));
+        pixel=bit.getPixel(rect.get(0).left+1,rect.get(0).top+1);
         R = (pixel & 0xff0000) >> 16;
         G = (pixel & 0xff00) >> 8;
         B = pixel & 0xff;
+<<<<<<< HEAD
       //  setCamera(new Camera2D());
         //  setFrameRate(30);
+=======
+        setCamera(new Camera2D());
+
+>>>>>>> 49998382e804961fdadafe24579bd5ffd7ceece8
         text=text1;
-        Rectangles=Rectangle;
-        //Rectangle=Rectangles;
-      // Log.e("text in render error==",""+Rec.toString());
+        rectArrayList=rect;
+
         mTime = 0;
     }
 
@@ -92,9 +106,7 @@ public class Renderer extends RajawaliRenderer {
 
         }
 
-        Log.e("translated==",""+translatedText.toString()+"  "+Rectangles+"  "+FirstRectangle);
-        Log.e("String RECTANGLES ARE ",""+Rectangles);
-        Log.e("StrFirstRECTANGLE is ",""+FirstRectangle);
+        Log.e("translated==",""+translatedText.toString()+"  "+rectArrayList.toString());
         Log.e("pixel is ",""+pixel);
         SimpleMaterial background = new SimpleMaterial();
         SimpleMaterial foreground = new SimpleMaterial();
