@@ -96,7 +96,7 @@ public class MainActivity extends ActionBarActivity {
         File externalStorageDirectory = Environment.getExternalStorageDirectory();
 
         //to increase the accuracy of tesseract OEM_TESSERACT_CUBE_COMBINED is used
-        baseAPI.init(Environment.getExternalStorageDirectory()+"/tesseract/", "hin",TessBaseAPI.OEM_TESSERACT_CUBE_COMBINED);
+        baseAPI.init("/storage/9016-4EF8/tesseract/", "hin",TessBaseAPI.OEM_TESSERACT_CUBE_COMBINED);
        //baseAPI.init("/storage/sdcard1/tesseract/", "hin",TessBaseAPI.OEM_TESSERACT_CUBE_COMBINED);
         Log.e("in Mainactivity", "on create");
 

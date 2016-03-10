@@ -9,10 +9,13 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.util.Log;
+import android.view.Display;
+import android.view.WindowManager;
 
 import com.memetix.mst.language.Language;
 import com.memetix.mst.translate.Translate;
 
+import org.opencv.core.Point;
 import org.opencv.imgproc.Imgproc;
 
 import java.lang.reflect.Array;
@@ -35,7 +38,10 @@ public class Renderer extends RajawaliRenderer {
 
     int pixel,R,G,B;
     String text;
-    Camera2D camera2D;;
+    Camera2D camera2D;
+    private float screenH, screenW;
+    private Display display;
+    private WindowManager windowManager;
     private ArrayList<Rect> rectArrayList,line_rect_list;
 
     public Bitmap textAsBitmap(String text, int textsize, int color) {
@@ -46,8 +52,8 @@ public class Renderer extends RajawaliRenderer {
 
         Bitmap newbi=Bitmap.createBitmap(newBit, 0,0,line_rect_list.get(0).width(),line_rect_list.get(0).height());   //height,width of rect
         Bitmap image=newbi.copy(Bitmap.Config.ARGB_8888, true);
-        image.eraseColor(Color.rgb(R,G,B));
-        //image.eraseColor(Color.rgb(255,255,255));
+        //image.eraseColor(Color.rgb(R,G,B));
+        image.eraseColor(Color.rgb(255,255,255));
 
         Canvas canvas = new Canvas(image);
         paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
@@ -62,11 +68,19 @@ public class Renderer extends RajawaliRenderer {
         camera2D = new Camera2D();
         this.setCamera(this.camera2D);
         newBit=bit;
+        windowManager = (WindowManager) context.getSystemService(context.WINDOW_SERVICE);
+        display = windowManager.getDefaultDisplay();
+        android.graphics.Point size = new android.graphics.Point();
+        display.getSize(size);
+        screenW = (float) size.x;
+        screenH = (float) size.y;
+
        // pixel = bit.getPixel(Integer.parseInt(Rectangle.substring(6,Rectangle.indexOf(',')))-5,
         //        Integer.parseInt(Rectangle.substring(Rectangle.indexOf(' ')+1,Rectangle.indexOf('-')-1)));
         //Log.e("------RECTANGLE",""+Integer.parseInt(Rectangle.substring(Rectangle.indexOf(' ')+1,
          //       Rectangle.indexOf('-')-1)));
-        pixel=bit.getPixel(rect.get(0).left+1,rect.get(0).top+1);
+
+        pixel=bit.getPixel(rect.get(0).left + 1, rect.get(0).top + 1);
         R = (pixel & 0xff0000) >> 16;
         G = (pixel & 0xff00) >> 8;
         B = pixel & 0xff;
@@ -103,7 +117,7 @@ public class Renderer extends RajawaliRenderer {
         SimpleMaterial background = new SimpleMaterial();
         SimpleMaterial foreground = new SimpleMaterial();
         //size of the text is static
-        Bitmap fg = textAsBitmap(translatedText,20,Color.rgb(0,0,0));
+        Bitmap fg = textAsBitmap(translatedText,30,Color.rgb(0,0,0));
         Bitmap bg = newBit;
 
         //this.camera2D.setZ(50f);
@@ -112,10 +126,12 @@ public class Renderer extends RajawaliRenderer {
         Log.e("--##dim",""+bg.getWidth()+" "+bg.getHeight());
         front = new Plane(1, 1, 1, 1, 1);
 
-        front.setScale((float)line_rect_list.get(0).width()/bg.getWidth(),(float)line_rect_list.get(0).height()/bg.getHeight(),0);
-        front.setPosition((float)(0.001*line_rect_list.get(0).left),.512f/2.0f-(float)(0.001*line_rect_list.get(0).top)/2.0f,0);
-
-        //front.setPosition(0.5f,0.5f,0);
+        float x1 = (float)line_rect_list.get(0).left-(screenW/2.0f);
+        float y1 = (float)screenH / 2.0f - line_rect_list.get(0).top;
+        Log.e("@@@positions", "W=" + screenW + " H=" + "BW="+line_rect_list.get(0).left+" BH="+line_rect_list.get(0).top+" "+ screenH + " " + x1 + " " + y1);
+        front.setScale((float) line_rect_list.get(0).width() / bg.getWidth(), (float) line_rect_list.get(0).height() / bg.getHeight(), 0);
+       // front.setPosition(0.001f * (screenW-line_rect_list.get(0).left), 0.001f * ( line_rect_list.get(0).top), 0);
+        front.setPosition(0,0,0);
         back.setMaterial(background);
         front.setMaterial(foreground);
         front.addTexture(mTextureManager.addTexture(fg));
