@@ -15,16 +15,11 @@ import android.view.WindowManager;
 import com.memetix.mst.language.Language;
 import com.memetix.mst.translate.Translate;
 
-import org.opencv.core.Point;
-import org.opencv.imgproc.Imgproc;
-
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 import javax.microedition.khronos.opengles.GL10;
 
 import rajawali.Camera2D;
-import rajawali.OrthographicCamera;
 import rajawali.materials.SimpleMaterial;
 import rajawali.primitives.Plane;
 import rajawali.renderer.RajawaliRenderer;
@@ -86,7 +81,9 @@ public class Renderer extends RajawaliRenderer {
         B = pixel & 0xff;
 
         setCamera(new Camera2D());
-
+//        camera2D.setProjectionMatrix((int)screenW,(int)screenH);
+//        camera2D.setUseRotationMatrix(true);
+//        camera2D.setRotationMatrix(camera2D.getViewMatrix());
         text=text1;
         rectArrayList=rect;
         line_rect_list=line_rect;
@@ -131,7 +128,12 @@ public class Renderer extends RajawaliRenderer {
         Log.e("@@@positions", "W=" + screenW + " H=" + "BW="+line_rect_list.get(0).left+" BH="+line_rect_list.get(0).top+" "+ screenH + " " + x1 + " " + y1);
         front.setScale((float) line_rect_list.get(0).width() / bg.getWidth(), (float) line_rect_list.get(0).height() / bg.getHeight(), 0);
        // front.setPosition(0.001f * (screenW-line_rect_list.get(0).left), 0.001f * ( line_rect_list.get(0).top), 0);
-        front.setPosition(0,0,0);
+        //front.setScreenCoordinates(0.679f,0.180f,(int)screenW,(int)screenH,0);
+
+        //Log.e("view matrix value ==========",camera2D.getViewMatrix().toString());
+        //Log.e("projection matrix",camera2D.getProjectionMatrix().toString());
+
+        front.setPosition(0, 0, 0);
         back.setMaterial(background);
         front.setMaterial(foreground);
         front.addTexture(mTextureManager.addTexture(fg));
