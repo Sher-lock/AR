@@ -9,9 +9,6 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.util.Log;
-import android.view.Display;
-import android.view.WindowManager;
-
 
 import java.util.ArrayList;
 
@@ -33,9 +30,9 @@ public class Renderer extends RajawaliRenderer {
     String text;
     Camera2D camera2D;
     private float screenH, screenW;
-    private ArrayList<Rect> rectArrayList,line_rect_list;
-
-
+    private static ArrayList<Rect> rectArrayList,line_rect_list;
+    static int textColor;
+    private static Bitmap colorbit;
     public Bitmap textAsBitmap(String text, int textsize, int color) {
         Paint paint = new Paint();
         paint.setTextSize(textsize);
@@ -54,6 +51,10 @@ public class Renderer extends RajawaliRenderer {
         return image;
     }
     public static int  getBackgroundColor(){
+        pixel=colorbit.getPixel(rectArrayList.get(0).left + 1, rectArrayList.get(0).top + 1);
+        R = (pixel & 0xff0000) >> 16;
+        G = (pixel & 0xff00) >> 8;
+        B = pixel & 0xff;
         return Color.rgb(R,G,B);
     }
 
@@ -63,7 +64,7 @@ public class Renderer extends RajawaliRenderer {
         camera2D = new Camera2D();
         this.setCamera(this.camera2D);
         newBit=bit;
-
+        colorbit=bit;
         screenH = MainActivity.Get_height();
         screenW = MainActivity.Get_width();
 
@@ -73,10 +74,6 @@ public class Renderer extends RajawaliRenderer {
         //Log.e("------RECTANGLE",""+Integer.parseInt(Rectangle.substring(Rectangle.indexOf(' ')+1,
          //       Rectangle.indexOf('-')-1)));
 
-        pixel=bit.getPixel(rect.get(0).left + 1, rect.get(0).top + 1);
-        R = (pixel & 0xff0000) >> 16;
-        G = (pixel & 0xff00) >> 8;
-        B = pixel & 0xff;
 
         setCamera(new Camera2D());
 //        camera2D.setProjectionMatrix((int)screenW,(int)screenH);
@@ -87,10 +84,17 @@ public class Renderer extends RajawaliRenderer {
         line_rect_list=line_rect;
         mTime = 0;
     }
+    public static int colorForText(){
+        pixel=colorbit.getPixel(rectArrayList.get(0).left+(rectArrayList.get(0).right-rectArrayList.get(0).left)/2, rectArrayList.get(0).top+(rectArrayList.get(0).bottom-rectArrayList.get(0).top)/2);
+        R = (pixel & 0xff0000) >> 16;
+        G = (pixel & 0xff00) >> 8;
+        B = pixel & 0xff;
+        return Color.rgb(R,G,B);
+    }
 
     private float mTime;
 
-    Plane back,front;
+    Plane back;
     protected void initScene() {
 
 

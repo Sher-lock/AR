@@ -113,6 +113,7 @@ public class DoTheRender extends RajawaliActivity{
 
             custText.setText(translateText);
             custText.setTextSize(pxToDp((line_rect.get(0).bottom - line_rect.get(0).top)));
+            custText.setTextColor(Renderer.colorForText());
             rlp.setMargins((line_rect.get(0).left), (line_rect.get(0).top), (line_rect.get(0).right),
                     (line_rect.get(0).bottom));
             //childRelativeLayout.setPadding();
@@ -120,8 +121,9 @@ public class DoTheRender extends RajawaliActivity{
 
             childRelativeLayout.getLayoutParams().height=(line_rect.get(0).bottom-line_rect.get(0).top);
             childRelativeLayout.getLayoutParams().width=(line_rect.get(0).right-line_rect.get(0).left);
-            //childRelativeLayout.setBackgroundColor(Renderer.getBackgroundColor());
-            childRelativeLayout.setBackgroundColor(Color.BLACK);
+            childRelativeLayout.setBackgroundColor(Renderer.getBackgroundColor());
+
+            //childRelativeLayout.setBackgroundColor(Color.BLACK);
             childRelativeLayout.setLayoutParams(rlp);
             child.invalidate();
             mLayout.addView(child);
