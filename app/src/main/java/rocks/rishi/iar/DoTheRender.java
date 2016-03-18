@@ -1,8 +1,10 @@
 package rocks.rishi.iar;
 
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -64,6 +66,16 @@ public class DoTheRender extends RajawaliActivity{
 
     }
 
+    public static int dpToPx(int dp)
+    {
+        return (int) (dp * Resources.getSystem().getDisplayMetrics().density);
+    }
+
+    public static int pxToDp(int px)
+    {
+        return (int) (px / Resources.getSystem().getDisplayMetrics().density);
+    }
+
     private class renderTask extends AsyncTask<Void, Void,Integer> {
 
         @Override
@@ -91,17 +103,25 @@ public class DoTheRender extends RajawaliActivity{
             //so the rendering stuff can still be carried out on surface view while we make multiple child element
             //and it to the parent element
             View child = getLayoutInflater().inflate(R.layout.custom_view, null);
+
+            //get the child out the parents custom layout to modify them and then again them
+            //to the parent layout
+
             childRelativeLayout=(RelativeLayout)child.findViewById(R.id.child_rect);
             custText=(TextView)child.findViewById(R.id.cust_text);
             RelativeLayout.LayoutParams rlp=new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,ViewGroup.LayoutParams.WRAP_CONTENT);
 
             custText.setText(translateText);
-            
-            rlp.setMargins(line_rect.get(0).left,line_rect.get(0).top,line_rect.get(0).right,line_rect.get(0).bottom);
-            childRelativeLayout.getLayoutParams().height=line_rect.get(0).bottom-line_rect.get(0).top;
-            childRelativeLayout.getLayoutParams().width=line_rect.get(0).right-line_rect.get(0).left;
-            childRelativeLayout.setBackgroundColor(Renderer.getBackgroundColor());
+            custText.setTextSize(pxToDp((line_rect.get(0).bottom - line_rect.get(0).top)));
+            rlp.setMargins((line_rect.get(0).left), (line_rect.get(0).top), (line_rect.get(0).right),
+                    (line_rect.get(0).bottom));
+            //childRelativeLayout.setPadding();
+            rlp.setMarginStart((line_rect.get(0).left));
 
+            childRelativeLayout.getLayoutParams().height=(line_rect.get(0).bottom-line_rect.get(0).top);
+            childRelativeLayout.getLayoutParams().width=(line_rect.get(0).right-line_rect.get(0).left);
+            //childRelativeLayout.setBackgroundColor(Renderer.getBackgroundColor());
+            childRelativeLayout.setBackgroundColor(Color.BLACK);
             childRelativeLayout.setLayoutParams(rlp);
             child.invalidate();
             mLayout.addView(child);
