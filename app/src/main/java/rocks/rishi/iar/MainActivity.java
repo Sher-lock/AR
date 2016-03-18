@@ -112,13 +112,9 @@ public class MainActivity extends ActionBarActivity {
         File externalStorageDirectory = Environment.getExternalStorageDirectory();
 
         //to increase the accuracy of tesseract OEM_TESSERACT_CUBE_COMBINED is used
-<<<<<<< HEAD
-        0baseAPI.init("/storage/9016-4EF8/tesseract/", "hin",TessBaseAPI.OEM_TESSERACT_CUBE_COMBINED);
-       //baseAPI.init("/storage/sdcard1/tesseract/", "hin",TessBaseAPI.OEM_TESSERACT_CUBE_COMBINED);
-=======
-        baseAPI.init("/storage/9016-4EF8/tesseract/", "hin",TessBaseAPI.OEM_TESSERACT_CUBE_COMBINED);
+       baseAPI.init("/storage/sdcard1/tesseract/", "hin",TessBaseAPI.OEM_TESSERACT_CUBE_COMBINED);
+        //baseAPI.init("/storage/9016-4EF8/tesseract/", "hin",TessBaseAPI.OEM_TESSERACT_CUBE_COMBINED);
       // baseAPI.init("/storage/sdcard1/tesseract/", "hin",TessBaseAPI.OEM_TESSERACT_CUBE_COMBINED);
->>>>>>> 025e6a86c77d856e27359989e73886ce7d1ef8bd
         Log.e("in Mainactivity", "on create");
 
         //this if the user chooses a photo from gallery
@@ -274,6 +270,8 @@ public class MainActivity extends ActionBarActivity {
             Utils.matToBitmap(grayMat, currentBitmap);
             img.setImageBitmap(currentBitmap);
            // inspectFromBitmap();
+            currentBitmap = Bitmap.createScaledBitmap(currentBitmap, (int) screenW, (int) screenH, true);
+
         }catch(Exception ex){
 
             Log.e("Error in pre processing",Log.getStackTraceString(ex));
@@ -326,8 +324,9 @@ public class MainActivity extends ActionBarActivity {
             Bitmap tempBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
             originalMat = new Mat(tempBitmap.getHeight(), tempBitmap.getWidth(), CvType.CV_8U);
             Utils.bitmapToMat(tempBitmap, originalMat);
-            bitmap = Bitmap.createScaledBitmap(bitmap, (int) screenW, (int) screenH, true);
             currentBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, false);
+            bitmap = Bitmap.createScaledBitmap(bitmap, (int) screenW, (int) screenH, true);
+
             //preProcess();
             try {
                 //new Preprocessing().execute();

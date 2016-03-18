@@ -5,22 +5,14 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
-import android.text.Layout;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.memetix.mst.language.Language;
 import com.memetix.mst.translate.Translate;
-
-import org.opencv.core.Rect;
-
 import java.util.ArrayList;
 
 import rajawali.RajawaliActivity;
@@ -95,7 +87,7 @@ public class DoTheRender extends RajawaliActivity{
         @Override
         protected void onPostExecute(Integer x){
             //here we create a child view and add it on the parent view which already contains surface view
-            //as seen in rajawali activity which has its own frame layout which confines the surface view
+            //as seen in Rajawali activity which has its own frame layout which confines the surface view
             //so the rendering stuff can still be carried out on surface view while we make multiple child element
             //and it to the parent element
             View child = getLayoutInflater().inflate(R.layout.custom_view, null);
@@ -104,11 +96,11 @@ public class DoTheRender extends RajawaliActivity{
             RelativeLayout.LayoutParams rlp=new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,ViewGroup.LayoutParams.WRAP_CONTENT);
 
             custText.setText(translateText);
-
+            
             rlp.setMargins(line_rect.get(0).left,line_rect.get(0).top,line_rect.get(0).right,line_rect.get(0).bottom);
             childRelativeLayout.getLayoutParams().height=line_rect.get(0).bottom-line_rect.get(0).top;
             childRelativeLayout.getLayoutParams().width=line_rect.get(0).right-line_rect.get(0).left;
-            //childRelativeLayout.setBackgroundColor(Renderer.getBackgroundColor());
+            childRelativeLayout.setBackgroundColor(Renderer.getBackgroundColor());
 
             childRelativeLayout.setLayoutParams(rlp);
             child.invalidate();
