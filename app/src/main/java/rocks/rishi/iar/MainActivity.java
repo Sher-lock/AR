@@ -1,12 +1,10 @@
 package rocks.rishi.iar;
 
-import android.content.ContentValues;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Rect;
-import android.graphics.Typeface;
+import java.util.Date;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
@@ -22,28 +20,26 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
-
 import com.googlecode.tesseract.android.TessBaseAPI;
-
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
-
 import org.opencv.core.Mat;
-import org.opencv.core.Scalar;
+import org.opencv.core.Point;
+import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Locale;
 
 public class MainActivity extends ActionBarActivity {
     private static final int REQUEST_GALLERY = 0;
@@ -59,8 +55,11 @@ public class MainActivity extends ActionBarActivity {
     private static float screenH, screenW;
     private Display display;
     private WindowManager windowManager;
-
+    private static final String IMAGE_DIRECTORY_NAME = "Hello Camera";
+    public static final int MEDIA_TYPE_IMAGE = 1;
     private static ArrayList<Rect> rect,line_rect;
+    private Uri fileUri; // file url to store image/video
+    private static final int CAMERA_CAPTURE_IMAGE_REQUEST_CODE = 100;
     //public static String Rectangles;
     private BaseLoaderCallback mOpenCVCallBack = new
             BaseLoaderCallback(this) {
@@ -113,8 +112,8 @@ public class MainActivity extends ActionBarActivity {
 
         //to increase the accuracy of tesseract OEM_TESSERACT_CUBE_COMBINED is used
       // baseAPI.init("/storage/sdcard1/tesseract/", "hin",TessBaseAPI.OEM_TESSERACT_CUBE_COMBINED);
-      baseAPI.init("/storage/9016-4EF8/tesseract/", "hin",TessBaseAPI.OEM_TESSERACT_CUBE_COMBINED);
-      // baseAPI.init("/storage/sdcard1/tesseract/", "hin",TessBaseAPI.OEM_TESSERACT_CUBE_COMBINED);
+      //baseAPI.init("/storage/9016-4EF8/tesseract/", "hin",TessBaseAPI.OEM_TESSERACT_CUBE_COMBINED);
+       baseAPI.init("/storage/sdcard1/tesseract/", "hin",TessBaseAPI.OEM_TESSERACT_CUBE_COMBINED);
         Log.e("in Mainactivity", "on create");
 
         //this if the user chooses a photo from gallery
@@ -135,7 +134,7 @@ public class MainActivity extends ActionBarActivity {
 
             @Override
             public void onClick(View v) {
-                String filename = System.currentTimeMillis() + ".jpg";
+                /*String filename = System.currentTimeMillis() + ".jpg";
 
                 ContentValues values = new ContentValues();
                 values.put(MediaStore.Images.Media.TITLE, filename);
@@ -145,7 +144,8 @@ public class MainActivity extends ActionBarActivity {
                 Intent intent = new Intent();
                 intent.setAction(MediaStore.ACTION_IMAGE_CAPTURE);
                 intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
-                startActivityForResult(intent, REQUEST_CAMERA);
+                startActivityForResult(intent, REQUEST_CAMERA);*/
+                captureImage();
             }
         });
         findViewById(R.id.go).setOnClickListener(new View.OnClickListener() {
@@ -165,6 +165,51 @@ public class MainActivity extends ActionBarActivity {
         }
     }
 
+    public Uri getOutputMediaFileUri(int type) {
+        return Uri.fromFile(getOutputMediaFile(type));
+    }
+
+    private static File getOutputMediaFile(int type) {
+
+        // External sdcard location
+        File mediaStorageDir = new File(
+                Environment
+                        .getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),IMAGE_DIRECTORY_NAME);
+
+        // Create the storage directory if it does not exist
+        if (!mediaStorageDir.exists()) {
+            if (!mediaStorageDir.mkdirs()) {
+                Log.d(IMAGE_DIRECTORY_NAME, "Oops! Failed create "
+                        + IMAGE_DIRECTORY_NAME + " directory");
+                return null;
+            }
+        }
+
+        // Create a media file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss",
+                Locale.getDefault()).format(new Date());
+        File mediaFile;
+        if (type == MEDIA_TYPE_IMAGE) {
+            mediaFile = new File(mediaStorageDir.getPath() + File.separator
+                    + "IMG_" + timeStamp + ".jpg");
+        } else {
+            return null;
+        }
+
+        return mediaFile;
+    }
+
+
+    private void captureImage() {
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+        fileUri = getOutputMediaFileUri(MEDIA_TYPE_IMAGE);
+
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri);
+
+        // start the image capture Intent
+        startActivityForResult(intent, REQUEST_CAMERA);
+    }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -278,6 +323,16 @@ public class MainActivity extends ActionBarActivity {
         }
     }
 
+    //for deskewing the image
+    Mat deskew(Mat src, double angle) {
+        Point center = new Point(src.width()/2, src.height()/2);
+        Mat rotImage = Imgproc.getRotationMatrix2D(center, angle, 1.0);
+        //1.0 means 100 % scale
+        Size size = new Size(src.width(), src.height());
+        Imgproc.warpAffine(src, src, rotImage, size, Imgproc.INTER_LINEAR + Imgproc.CV_WARP_FILL_OUTLIERS);
+        return src;
+    }
+
     //sobel
     public void sobel(Mat temp){
         Mat grayMat = temp;
@@ -361,8 +416,8 @@ public class MainActivity extends ActionBarActivity {
                 break;
             case REQUEST_CAMERA:
                 if (resultCode == RESULT_OK) {
-                    if (imageUri != null) {
-                        inspect(imageUri);
+                    if (fileUri != null) {
+                        inspect(fileUri);
                     }
                 }
                 break;
