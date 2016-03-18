@@ -112,8 +112,8 @@ public class MainActivity extends ActionBarActivity {
         File externalStorageDirectory = Environment.getExternalStorageDirectory();
 
         //to increase the accuracy of tesseract OEM_TESSERACT_CUBE_COMBINED is used
-       baseAPI.init("/storage/sdcard1/tesseract/", "hin",TessBaseAPI.OEM_TESSERACT_CUBE_COMBINED);
-        //baseAPI.init("/storage/9016-4EF8/tesseract/", "hin",TessBaseAPI.OEM_TESSERACT_CUBE_COMBINED);
+      // baseAPI.init("/storage/sdcard1/tesseract/", "hin",TessBaseAPI.OEM_TESSERACT_CUBE_COMBINED);
+      baseAPI.init("/storage/9016-4EF8/tesseract/", "hin",TessBaseAPI.OEM_TESSERACT_CUBE_COMBINED);
       // baseAPI.init("/storage/sdcard1/tesseract/", "hin",TessBaseAPI.OEM_TESSERACT_CUBE_COMBINED);
         Log.e("in Mainactivity", "on create");
 
@@ -277,6 +277,7 @@ public class MainActivity extends ActionBarActivity {
             Log.e("Error in pre processing",Log.getStackTraceString(ex));
         }
     }
+
     //sobel
     public void sobel(Mat temp){
         Mat grayMat = temp;
@@ -310,13 +311,14 @@ public class MainActivity extends ActionBarActivity {
 
             is = getContentResolver().openInputStream(uri);
             BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-            options.inSampleSize = 0;
+           // options.inPreferredConfig = Bitmap.Config.RGB_565;
+           // options.inSampleSize = 2;
+            options.inDither = true;
             options.inScreenDensity = DisplayMetrics.DENSITY_LOW;
             bitmap = BitmapFactory.decodeStream(is, null, options);
 
             ByteArrayOutputStream out = new ByteArrayOutputStream();
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
             Bitmap decoded = BitmapFactory.decodeStream(new ByteArrayInputStream(out.toByteArray()));
 
             bitmap=decoded;
