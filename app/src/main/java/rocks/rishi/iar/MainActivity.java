@@ -15,9 +15,11 @@ import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -54,6 +56,10 @@ public class MainActivity extends ActionBarActivity {
     private Mat originalMat;
     private Bitmap currentBitmap;
     private ImageView img;
+    private static float screenH, screenW;
+    private Display display;
+    private WindowManager windowManager;
+
     private static ArrayList<Rect> rect,line_rect;
     //public static String Rectangles;
     private BaseLoaderCallback mOpenCVCallBack = new
@@ -91,13 +97,28 @@ public class MainActivity extends ActionBarActivity {
                 MainActivity.this, mOpenCVCallBack)) {
             Log.e("TEST", "Cannot connect to OpenCV Manager");
         }
+
+        windowManager = (WindowManager) getApplicationContext().getSystemService(getApplicationContext().WINDOW_SERVICE);
+        display = windowManager.getDefaultDisplay();
+        android.graphics.Point size = new android.graphics.Point();
+        display.getSize(size);
+        screenW = (float) size.x;
+        screenH = (float) size.y;
+
+
+
         tv=(TextView)findViewById(R.id.marathi);
         baseAPI = new TessBaseAPI();
         File externalStorageDirectory = Environment.getExternalStorageDirectory();
 
         //to increase the accuracy of tesseract OEM_TESSERACT_CUBE_COMBINED is used
+<<<<<<< HEAD
         0baseAPI.init("/storage/9016-4EF8/tesseract/", "hin",TessBaseAPI.OEM_TESSERACT_CUBE_COMBINED);
        //baseAPI.init("/storage/sdcard1/tesseract/", "hin",TessBaseAPI.OEM_TESSERACT_CUBE_COMBINED);
+=======
+        baseAPI.init("/storage/9016-4EF8/tesseract/", "hin",TessBaseAPI.OEM_TESSERACT_CUBE_COMBINED);
+      // baseAPI.init("/storage/sdcard1/tesseract/", "hin",TessBaseAPI.OEM_TESSERACT_CUBE_COMBINED);
+>>>>>>> 025e6a86c77d856e27359989e73886ce7d1ef8bd
         Log.e("in Mainactivity", "on create");
 
         //this if the user chooses a photo from gallery
@@ -184,6 +205,17 @@ public class MainActivity extends ActionBarActivity {
         //return Rectangles;
         return line_rect;
     }
+
+    public static float Get_height(){
+        //return screen height
+        return screenH;
+    }
+
+    public static float Get_width(){
+        //return screen height
+        return screenW;
+    }
+
 
     private void inspectFromBitmap() {
 
@@ -294,6 +326,7 @@ public class MainActivity extends ActionBarActivity {
             Bitmap tempBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
             originalMat = new Mat(tempBitmap.getHeight(), tempBitmap.getWidth(), CvType.CV_8U);
             Utils.bitmapToMat(tempBitmap, originalMat);
+            bitmap = Bitmap.createScaledBitmap(bitmap, (int) screenW, (int) screenH, true);
             currentBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, false);
             //preProcess();
             try {

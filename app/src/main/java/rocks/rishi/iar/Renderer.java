@@ -33,8 +33,6 @@ public class Renderer extends RajawaliRenderer {
     String text;
     Camera2D camera2D;
     private float screenH, screenW;
-    private Display display;
-    private WindowManager windowManager;
     private ArrayList<Rect> rectArrayList,line_rect_list;
 
 
@@ -65,14 +63,12 @@ public class Renderer extends RajawaliRenderer {
         camera2D = new Camera2D();
         this.setCamera(this.camera2D);
         newBit=bit;
-        windowManager = (WindowManager) context.getSystemService(context.WINDOW_SERVICE);
-        display = windowManager.getDefaultDisplay();
-        android.graphics.Point size = new android.graphics.Point();
-        display.getSize(size);
-        screenW = (float) size.x;
-        screenH = (float) size.y;
 
-       // pixel = bit.getPixel(Integer.parseInt(Rectangle.substring(6,Rectangle.indexOf(',')))-5,
+        screenH = MainActivity.Get_height();
+        screenW = MainActivity.Get_width();
+
+
+        // pixel = bit.getPixel(Integer.parseInt(Rectangle.substring(6,Rectangle.indexOf(',')))-5,
         //        Integer.parseInt(Rectangle.substring(Rectangle.indexOf(' ')+1,Rectangle.indexOf('-')-1)));
         //Log.e("------RECTANGLE",""+Integer.parseInt(Rectangle.substring(Rectangle.indexOf(' ')+1,
          //       Rectangle.indexOf('-')-1)));
@@ -113,7 +109,7 @@ public class Renderer extends RajawaliRenderer {
         //front = new Plane(1, 1, 1, 1, 1);
 
         float x1 = (float)line_rect_list.get(0).left-(screenW/2.0f);
-        float y1 = (float)screenH / 2.0f - line_rect_list.get(0).top;
+        float y1 = screenH / 2.0f - line_rect_list.get(0).top;
         Log.e("@@@positions", "W=" + screenW + " H=" + "BW="+line_rect_list.get(0).left+" BH="+line_rect_list.get(0).top+" "+ screenH + " " + x1 + " " + y1);
         //front.setScale((float) line_rect_list.get(0).width() / bg.getWidth(), (float) line_rect_list.get(0).height() / bg.getHeight(), 0);
        // front.setPosition(0.001f * (screenW-line_rect_list.get(0).left), 0.001f * ( line_rect_list.get(0).top), 0);
