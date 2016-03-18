@@ -119,10 +119,11 @@ public class DoTheRender extends RajawaliActivity{
             //childRelativeLayout.setPadding();
             rlp.setMarginStart((line_rect.get(0).left));
 
-            childRelativeLayout.getLayoutParams().height=(line_rect.get(0).bottom-line_rect.get(0).top);
-            childRelativeLayout.getLayoutParams().width=(line_rect.get(0).right-line_rect.get(0).left);
+            //childRelativeLayout.getLayoutParams().height=(line_rect.get(0).bottom-line_rect.get(0).top);
+          //  childRelativeLayout.getLayoutParams().width=(line_rect.get(0).right-line_rect.get(0).left);
             childRelativeLayout.setBackgroundColor(Renderer.getBackgroundColor());
-
+            if(childRelativeLayout.getLayoutParams().width<(line_rect.get(0).right-line_rect.get(0).left))
+                childRelativeLayout.setMinimumWidth(line_rect.get(0).right-line_rect.get(0).left);
             //childRelativeLayout.setBackgroundColor(Color.BLACK);
             childRelativeLayout.setLayoutParams(rlp);
             child.invalidate();
