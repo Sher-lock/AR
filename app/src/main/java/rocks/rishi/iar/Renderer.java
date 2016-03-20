@@ -28,6 +28,7 @@ public class Renderer extends RajawaliRenderer {
 
     static int pixel,R,G,B;
     String text;
+    private static int backColour;
     Camera2D camera2D;
     private float screenH, screenW;
     private static ArrayList<Rect> rectArrayList,line_rect_list;
@@ -38,6 +39,7 @@ public class Renderer extends RajawaliRenderer {
         paint.setTextSize(textsize);
         paint.setColor(color);
         paint.setTextAlign(Paint.Align.CENTER);
+
 
         Bitmap newbi=Bitmap.createBitmap(newBit, 0,0,line_rect_list.get(0).width(),line_rect_list.get(0).height());   //height,width of rect
         Bitmap image=newbi.copy(Bitmap.Config.ARGB_8888, true);
@@ -55,6 +57,7 @@ public class Renderer extends RajawaliRenderer {
         R = (pixel & 0xff0000) >> 16;
         G = (pixel & 0xff00) >> 8;
         B = pixel & 0xff;
+        backColour=Color.rgb(R,G,B);
         return Color.rgb(R,G,B);
     }
 
@@ -85,11 +88,25 @@ public class Renderer extends RajawaliRenderer {
         mTime = 0;
     }
     public static int colorForText(){
-        pixel=colorbit.getPixel(rectArrayList.get(0).left+(rectArrayList.get(0).right-rectArrayList.get(0).left)/2, rectArrayList.get(0).top+(rectArrayList.get(0).bottom-rectArrayList.get(0).top)/2);
-        R = (pixel & 0xff0000) >> 16;
-        G = (pixel & 0xff00) >> 8;
-        B = pixel & 0xff;
-        return Color.rgb(R,G,B);
+        for(int i=rectArrayList.get(0).left;i<rectArrayList.get(0).right ;i++){
+            for(int j=rectArrayList.get(0).top;j<rectArrayList.get(0).bottom;j++){
+
+                pixel=colorbit.getPixel(i,j);
+                R = (pixel & 0xff0000) >> 16;
+                G = (pixel & 0xff00) >> 8;
+                B = pixel & 0xff;
+                Log.e("redddddddddddddd",R+" "+G+" "+B);
+                //colorbit.setPixel(i,j,Color.BLACK);
+                //Log.e("the colour matrix",i+" "+j);
+                //Log.e("color",Color.rgb(R,G,B)+" "+backColour);
+                if(backColour!=Color.rgb(R,G,B)){
+                    Log.e("redddddddddddddd",R+" "+G+" "+B);
+                    return Color.rgb(R,G,B);
+                }
+
+            }
+        }
+        return backColour;
     }
 
     private float mTime;

@@ -82,12 +82,14 @@ public class DoTheRender extends RajawaliActivity{
         protected Integer doInBackground(Void... params) {
             Translate.setClientId("IndiAR");
             Translate.setClientSecret("63KlfJGAQAW8i/q1RWJjm+1qFzgYXQ3gBt7PSjhQqKs=");
-
-
+            Renderer.getBackgroundColor();
+            Renderer.colorForText();
             try {
                 Log.e("before translation= ",""+text);
 
                 translateText=Translate.execute(text, Language.HINDI,Language.ENGLISH);
+                Log.e("after translation= ",""+translateText);
+
             } catch (Exception e) {
                 e.printStackTrace();
                 Log.e("==error==",""+e.toString());
@@ -113,7 +115,7 @@ public class DoTheRender extends RajawaliActivity{
 
             custText.setText(translateText);
             custText.setTextSize(pxToDp((line_rect.get(0).bottom - line_rect.get(0).top)));
-            custText.setTextColor(Renderer.colorForText());
+
             rlp.setMargins((line_rect.get(0).left), (line_rect.get(0).top), (line_rect.get(0).right),
                     (line_rect.get(0).bottom));
             //childRelativeLayout.setPadding();
@@ -122,8 +124,18 @@ public class DoTheRender extends RajawaliActivity{
             //childRelativeLayout.getLayoutParams().height=(line_rect.get(0).bottom-line_rect.get(0).top);
           //  childRelativeLayout.getLayoutParams().width=(line_rect.get(0).right-line_rect.get(0).left);
             childRelativeLayout.setBackgroundColor(Renderer.getBackgroundColor());
+            custText.setTextColor(Color.BLACK);
+
+            Log.e("Renderer back check", Renderer.getBackgroundColor() + "");
+            Log.e("Renderer front check", Renderer.colorForText()+ "");
+
             if(childRelativeLayout.getLayoutParams().width<(line_rect.get(0).right-line_rect.get(0).left))
                 childRelativeLayout.setMinimumWidth(line_rect.get(0).right-line_rect.get(0).left);
+
+            if(childRelativeLayout.getTop()<(line_rect.get(0).top))
+                childRelativeLayout.setMinimumHeight((line_rect.get(0).top - childRelativeLayout.getTop()) + line_rect.get(0).bottom - line_rect.get(0).top);
+
+
             //childRelativeLayout.setBackgroundColor(Color.BLACK);
             childRelativeLayout.setLayoutParams(rlp);
             child.invalidate();
