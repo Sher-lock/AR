@@ -56,7 +56,7 @@ public class MainActivity extends ActionBarActivity {
     private TessBaseAPI baseAPI;
     private Uri imageUri;
     private Mat originalMat;
-    private Bitmap currentBitmap;
+    private Bitmap currentBitmap,newBitmap;
     private ImageView img;
     private static float screenH, screenW;
     private Display display;
@@ -136,7 +136,7 @@ public class MainActivity extends ActionBarActivity {
         File externalStorageDirectory = Environment.getExternalStorageDirectory();
 
         //to increase the accuracy of tesseract OEM_TESSERACT_CUBE_COMBINED is used
-       baseAPI.init("/storage/sdcard1/tesseract/", "hin",TessBaseAPI.OEM_TESSERACT_CUBE_COMBINED);
+       baseAPI.init(externalStorageDirectory+"/tesseract/", "hin",TessBaseAPI.OEM_TESSERACT_CUBE_COMBINED);
          //baseAPI.init("/storage/9016-4EF8/tesseract/", "hin",TessBaseAPI.OEM_TESSERACT_CUBE_COMBINED);
        //baseAPI.init("/storage/sdcard1/tesseract/", "hin",TessBaseAPI.OEM_TESSERACT_CUBE_COMBINED);
         Log.e("in Mainactivity", "on create");
@@ -313,6 +313,7 @@ public class MainActivity extends ActionBarActivity {
         Mat nextMat=new Mat();
 
         Bitmap newBit = Bitmap.createBitmap(currentBitmap);
+
         Log.e("in Mainactivity", "in preprocessing filter");
         try {
             //Converting the image to grayscale
@@ -323,18 +324,19 @@ public class MainActivity extends ActionBarActivity {
 
 
             Log.e("in Mainactivity", "Here we go");
-           Imgproc.threshold(grayMat, grayMat, 50, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C);
+           //Imgproc.threshold(grayMat, grayMat, 50, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C);
 
             //Converting Mat back to Bitmap
             //This is the previous mat which is converted to bitmap
             //which provides binarized image
-            Utils.matToBitmap(grayMat, currentBitmap);
+            //Utils.matToBitmap(grayMat, currentBitmap);
 
             //here we find the contours because if use this method before above method then tesseract
             //does not returns the bounding boxes
-            Imgproc.findContours(nextMat, contours, heirarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
+            Imgproc.findContours(grayMat, contours, heirarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
 
             //this iterator is used to visit over each contour(region) recognised by contour
+
             Iterator<MatOfPoint> each=contours.iterator();
 
             Log.e("contours array list", "" + contours.size());
@@ -351,14 +353,20 @@ public class MainActivity extends ActionBarActivity {
             }
             //after removing the contour not required we draw the contours on a new matrix
             for (int contourIdx = 0; contourIdx < contours.size(); contourIdx++) {
-                Imgproc.drawContours(nextMat, contours, contourIdx, new Scalar(0, 0, 255), -1);
+                Imgproc.drawContours(nextMat, contours, contourIdx, new Scalar(0 ,0 , 255), -1);
             }
 
             //and now if we try to do the same as we wanted to do above it gives error
             //THIS IS THE FUCKING CONTRADICTION WHICH IS NOT ALLOWING THE FURTHER DEVELOPEMENT
             // PLEASE SEE IF YOU CAN FUCK THIS PROBLEM
-           // Utils.matToBitmap(nextMat,newBit);
-            currentBitmap = Bitmap.createScaledBitmap(currentBitmap, (int) screenW, (int) screenH, true);
+            Imgproc.Canny(nextMat,nextMat,50,200);
+
+            Imgproc.threshold(nextMat, nextMat, 30, 255, Imgproc.THRESH_BINARY_INV);
+            Utils.matToBitmap(nextMat,newBitmap);
+//            currentBitmap = Bitmap.createScaledBitmap(currentBitmap, (int) screenW, (int) screenH, true);
+          //  currentBitmap=Bitmap.createScaledBitmap(currentBitmap, (int) screenW, (int) screenH, true);
+            newBitmap=Bitmap.createScaledBitmap(newBitmap, (int) screenW, (int) screenH, true);
+           currentBitmap=newBitmap;
 
         }catch(Exception ex){
 
@@ -401,6 +409,8 @@ public class MainActivity extends ActionBarActivity {
             originalMat = new Mat(tempBitmap.getHeight(), tempBitmap.getWidth(), CvType.CV_8U);
             Utils.bitmapToMat(tempBitmap, originalMat);
             currentBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, false);
+            newBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, false);
+
             bitmap = Bitmap.createScaledBitmap(bitmap, (int) screenW, (int) screenH, true);
 
             //preProcess();
