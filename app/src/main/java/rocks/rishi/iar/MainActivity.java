@@ -3,8 +3,11 @@ package rocks.rishi.iar;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.Rect;
 import java.util.Date;
+
+import android.media.Image;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
@@ -28,7 +31,9 @@ import org.opencv.android.Utils;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint;
 import org.opencv.core.Point;
+import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import java.io.ByteArrayInputStream;
@@ -39,6 +44,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Locale;
 
 public class MainActivity extends ActionBarActivity {
@@ -58,6 +64,10 @@ public class MainActivity extends ActionBarActivity {
     private static final String IMAGE_DIRECTORY_NAME = "Hello Camera";
     public static final int MEDIA_TYPE_IMAGE = 1;
     private static ArrayList<Rect> rect,line_rect;
+
+    private Mat newImg;
+    //contains many parameter example number of contours etc
+
     private Uri fileUri; // file url to store image/video
     private static final int CAMERA_CAPTURE_IMAGE_REQUEST_CODE = 100;
     //public static String Rectangles;
@@ -86,7 +96,23 @@ public class MainActivity extends ActionBarActivity {
 //        }
 //    }
 
+//added newly
+//@Override
+//protected void onResume() {
+//    super.onResume();
+//    OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_2_4_8, this,
+//            mOpenCVCallBack);
+//}
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putInt("param", 1);
+        super.onSaveInstanceState(outState);
+    }
 
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        int param;
+        param = savedInstanceState.getInt("param");
+        super.onRestoreInstanceState(savedInstanceState);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,14 +131,13 @@ public class MainActivity extends ActionBarActivity {
         screenH = (float) size.y;
 
 
-
         tv=(TextView)findViewById(R.id.marathi);
         baseAPI = new TessBaseAPI();
         File externalStorageDirectory = Environment.getExternalStorageDirectory();
 
         //to increase the accuracy of tesseract OEM_TESSERACT_CUBE_COMBINED is used
-      // baseAPI.init("/storage/sdcard1/tesseract/", "hin",TessBaseAPI.OEM_TESSERACT_CUBE_COMBINED);
-      baseAPI.init("/storage/9016-4EF8/tesseract/", "hin",TessBaseAPI.OEM_TESSERACT_CUBE_COMBINED);
+       baseAPI.init("/storage/sdcard1/tesseract/", "hin",TessBaseAPI.OEM_TESSERACT_CUBE_COMBINED);
+         //baseAPI.init("/storage/9016-4EF8/tesseract/", "hin",TessBaseAPI.OEM_TESSERACT_CUBE_COMBINED);
        //baseAPI.init("/storage/sdcard1/tesseract/", "hin",TessBaseAPI.OEM_TESSERACT_CUBE_COMBINED);
         Log.e("in Mainactivity", "on create");
 
@@ -155,14 +180,6 @@ public class MainActivity extends ActionBarActivity {
             }
         });
         img=(ImageView)findViewById(R.id.inter);
-    }
-
-    public class Preprocessing extends AsyncTask<Void,Void,Void>{
-        protected Void doInBackground(Void... urls)
-        {
-            preProcess();
-            return null;
-        }
     }
 
     public Uri getOutputMediaFileUri(int type) {
@@ -290,31 +307,57 @@ public class MainActivity extends ActionBarActivity {
     }
 
     public void preProcess(){
+        ArrayList<MatOfPoint> contours;
         Mat grayMat = new Mat();
+        Mat heirarchy=new Mat();
+        Mat nextMat=new Mat();
 
+        Bitmap newBit = Bitmap.createBitmap(currentBitmap);
         Log.e("in Mainactivity", "in preprocessing filter");
         try {
             //Converting the image to grayscale
             Imgproc.cvtColor(originalMat, grayMat, Imgproc.COLOR_BGR2GRAY);
             Log.e("in Mainactivity", "feeling awesome");
+            contours=new ArrayList<>();
+            nextMat=grayMat;
 
-            //then we convert the image to binary by using adaptive thresholding
-            //Core.multiply(grayMat, new Scalar(100), grayMat);
+
             Log.e("in Mainactivity", "Here we go");
-            Imgproc.threshold(grayMat, grayMat, 50, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C);
+           Imgproc.threshold(grayMat, grayMat, 50, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C);
 
-            Imgproc.cvtColor(originalMat, grayMat, Imgproc.COLOR_BGR2GRAY);
-            Log.e("in Mainactivity", "life is beutiful");
-            //then we apply sobel filter to increase the accuracy of tesseract
-           // sobel(grayMat);
-            //sending the image to tessseract to extract the characters from the image
-            Log.e("in Mainactivity", "live and let live");
-           // inspectFromBitmap();
-            Log.e("in Mainactivity", "Hello world!");
             //Converting Mat back to Bitmap
+            //This is the previous mat which is converted to bitmap
+            //which provides binarized image
             Utils.matToBitmap(grayMat, currentBitmap);
-            img.setImageBitmap(currentBitmap);
-           // inspectFromBitmap();
+
+            //here we find the contours because if use this method before above method then tesseract
+            //does not returns the bounding boxes
+            Imgproc.findContours(nextMat, contours, heirarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
+
+            //this iterator is used to visit over each contour(region) recognised by contour
+            Iterator<MatOfPoint> each=contours.iterator();
+
+            Log.e("contours array list", "" + contours.size());
+
+            //we remove the contours from the contour list which are not required
+            //for that we compare the width with the height
+            while(each.hasNext()){
+                MatOfPoint wrapper =each.next();
+                int height=wrapper.height();
+                int width=wrapper.width();
+                if(width<height){
+                    each.remove();
+                }
+            }
+            //after removing the contour not required we draw the contours on a new matrix
+            for (int contourIdx = 0; contourIdx < contours.size(); contourIdx++) {
+                Imgproc.drawContours(nextMat, contours, contourIdx, new Scalar(0, 0, 255), -1);
+            }
+
+            //and now if we try to do the same as we wanted to do above it gives error
+            //THIS IS THE FUCKING CONTRADICTION WHICH IS NOT ALLOWING THE FURTHER DEVELOPEMENT
+            // PLEASE SEE IF YOU CAN FUCK THIS PROBLEM
+           // Utils.matToBitmap(nextMat,newBit);
             currentBitmap = Bitmap.createScaledBitmap(currentBitmap, (int) screenW, (int) screenH, true);
 
         }catch(Exception ex){
@@ -333,31 +376,7 @@ public class MainActivity extends ActionBarActivity {
         return src;
     }
 
-    //sobel
-    public void sobel(Mat temp){
-        Mat grayMat = temp;
-        Mat sobel = new Mat(); //Mat to store the result
-        //Mat to store gradient and absolute gradient respectively
-        Mat grad_x = new Mat();
-        Mat abs_grad_x = new Mat();
-        Mat grad_y = new Mat();
-        Mat abs_grad_y = new Mat();
 
-        //Calculating gradient in horizontal direction
-        Imgproc.Sobel(grayMat, grad_x, CvType.CV_16S, 1, 0, 3, 1, 0);
-        //Calculating gradient in vertical direction
-        Imgproc.Sobel(grayMat, grad_y, CvType.CV_16S, 0, 1, 3, 1, 0);
-        //Calculating absolute value of gradients in both the direction
-        Core.convertScaleAbs(grad_x, abs_grad_x);
-        Core.convertScaleAbs(grad_y, abs_grad_y);
-        //Calculating the resultant gradient
-        Core.addWeighted(abs_grad_x, 0.5,
-                abs_grad_y, 0.5, 1, sobel);
-//Converting Mat back to Bitmap
-        Utils.matToBitmap(sobel, currentBitmap);
-        img.setImageBitmap(currentBitmap);
-
-    }
     private void inspect(Uri uri) {
         InputStream is = null;
         try {
@@ -386,13 +405,13 @@ public class MainActivity extends ActionBarActivity {
 
             //preProcess();
             try {
-                //new Preprocessing().execute();
-                preProcess();
+                new PreProcessing().execute();
+                //preProcess();
             }
             catch(Exception ex){
                 Log.e("YOUR ERROR IS\n\n\n\n\n\n ",Log.getStackTraceString(ex));
             }
-            inspectFromBitmap();
+            //inspectFromBitmap();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } finally {
@@ -404,7 +423,26 @@ public class MainActivity extends ActionBarActivity {
             }
         }
     }
+    class PreProcessing extends AsyncTask<Void,Void,Integer>{
 
+        @Override
+        protected Integer doInBackground(Void... params) {
+            try {
+
+                preProcess();
+            }
+            catch(Exception ex){
+                Log.e("YOUR ERROR IS\n\n\n\n\n\n ",Log.getStackTraceString(ex));
+            }
+
+            return null;
+        }
+        @Override
+        protected void onPostExecute(Integer i) {
+            img.setImageBitmap(currentBitmap);
+            inspectFromBitmap();
+        }
+    }
     //do the operation after selecting the image
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
