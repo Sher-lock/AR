@@ -26,9 +26,11 @@ public class DoTheRender extends RajawaliActivity{
 
     //to do the rendering stuff
     private Renderer mRenderer;
-    private String text,FirstRectangle;
+    private String text;
     private ArrayList<android.graphics.Rect> rect,line_rect;
     private String translateText;
+    private ArrayList<String> listOfText;
+
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
@@ -40,13 +42,12 @@ public class DoTheRender extends RajawaliActivity{
                         | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                         | View.SYSTEM_UI_FLAG_FULLSCREEN
                         | View.SYSTEM_UI_FLAG_IMMERSIVE);
+
         Intent intent = getIntent();
-        //customView=(RelativeLayout)findViewById(R.id.cust_view);
         Bitmap bitmap =MainActivity.getBitmap();
         text=intent.getStringExtra("string");
         rect=MainActivity.getRectangles();
         line_rect=MainActivity.getLineRectangles();
-        //FirstRectangle=intent.getStringExtra("FirstRectangle");
         mRenderer = new Renderer(this,bitmap,text,rect,line_rect);
         mRenderer.setSurfaceView(mSurfaceView);
 
@@ -121,7 +122,7 @@ public class DoTheRender extends RajawaliActivity{
             custText=(TextView)child.findViewById(R.id.cust_text);
             RelativeLayout.LayoutParams rlp=new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,ViewGroup.LayoutParams.WRAP_CONTENT);
 
-            custText.setText(translateText);
+            custText.setText(listOfText.get(rectangleNumber));
             custText.setTextSize(pxToDp((line_rect.get(rectangleNumber).bottom - line_rect.get(rectangleNumber).top)));
 
             rlp.setMargins((line_rect.get(rectangleNumber).left), (line_rect.get(rectangleNumber).top), (line_rect.get(rectangleNumber).right),

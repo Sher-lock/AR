@@ -3,11 +3,8 @@ package rocks.rishi.iar;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.graphics.Rect;
 import java.util.Date;
-
-import android.media.Image;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
@@ -23,12 +20,13 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import com.googlecode.tesseract.android.TessBaseAPI;
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
-import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
@@ -64,6 +62,7 @@ public class MainActivity extends ActionBarActivity {
     private static final String IMAGE_DIRECTORY_NAME = "Hello Camera";
     public static final int MEDIA_TYPE_IMAGE = 1;
     private static ArrayList<Rect> rect,line_rect;
+    private static ArrayList<String> listOfTexts;
 
     private Mat newImg;
     //contains many parameter example number of contours etc
@@ -87,24 +86,7 @@ public class MainActivity extends ActionBarActivity {
                     }
                 }
             };
-//    static{
-//        if (!OpenCVLoader.initDebug()) {
-//            // Handle initialization error
-//            Log.i(TAG, "OpenCVLoader Failed");
-//        } else {
-//            Log.i(TAG, "OpenCVLoader Succeeded");
-//            System.loadLibrary("CameraVision");
-//            System.loadLibrary("opencv_java3");
-//        }
-//    }
 
-//added newly
-//@Override
-//protected void onResume() {
-//    super.onResume();
-//    OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_2_4_8, this,
-//            mOpenCVCallBack);
-//}
     protected void onSaveInstanceState(Bundle outState) {
         outState.putInt("param", 1);
         super.onSaveInstanceState(outState);
@@ -124,7 +106,9 @@ public class MainActivity extends ActionBarActivity {
                 MainActivity.this, mOpenCVCallBack)) {
             Log.e("TEST", "Cannot connect to OpenCV Manager");
         }
-
+        rect=new ArrayList<Rect>();
+        line_rect=new ArrayList<Rect>();
+        listOfTexts= new ArrayList<>();
         windowManager = (WindowManager) getApplicationContext().getSystemService(getApplicationContext().WINDOW_SERVICE);
         display = windowManager.getDefaultDisplay();
         android.graphics.Point size = new android.graphics.Point();
@@ -141,7 +125,7 @@ public class MainActivity extends ActionBarActivity {
 
        baseAPI.init("/storage/sdcard1/tesseract/", "hin",TessBaseAPI.OEM_TESSERACT_CUBE_COMBINED);
       //baseAPI.init("/storage/9016-4EF8/tesseract/", "hin",TessBaseAPI.OEM_TESSERACT_CUBE_COMBINED);
-       //baseAPI.init("/storage/sdcard1/tesseract/", "hin",TessBaseAPI.OEM_TESSERACT_CUBE_COMBINED);
+      //baseAPI.init("/storage/sdcard1/tesseract/", "hin",TessBaseAPI.OEM_TESSERACT_CUBE_COMBINED);
         Log.e("in Mainactivity", "on create");
 
         //this if the user chooses a photo from gallery
@@ -162,17 +146,6 @@ public class MainActivity extends ActionBarActivity {
 
             @Override
             public void onClick(View v) {
-                /*String filename = System.currentTimeMillis() + ".jpg";
-
-                ContentValues values = new ContentValues();
-                values.put(MediaStore.Images.Media.TITLE, filename);
-                values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
-                imageUri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
-
-                Intent intent = new Intent();
-                intent.setAction(MediaStore.ACTION_IMAGE_CAPTURE);
-                intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
-                startActivityForResult(intent, REQUEST_CAMERA);*/
                 captureImage();
             }
         });
@@ -277,34 +250,24 @@ public class MainActivity extends ActionBarActivity {
         return screenW;
     }
 
+    public static ArrayList<String> getListOfTexts(){
+        return listOfTexts;
+    }
 
     private void inspectFromBitmap() {
-
-        Log.e("in Mainactivity", "inspect from bitmap");
-
-        //this tells how much processing the tesseract will have to perform berfore recognizing the text
-        baseAPI.setPageSegMode(100);//100
+        baseAPI.setPageSegMode(100);
         baseAPI.setPageSegMode(3);
         baseAPI.setImage(currentBitmap);
-        tv.setText(baseAPI.getUTF8Text());
+        Log.e("THIS IS THE ERROR", baseAPI.getUTF8Text());
 
-        Log.e("this is the text",""+tv.getText().toString());
-        Log.d("HINDI=====>>", tv.getText().toString());
-
+        new ExtractText().execute();
+        Log.e("rect and line of rect",rect.toString()+" "+line_rect.toString());
         ByteArrayOutputStream bs = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.PNG, 50, bs);
 
         Intent renderIntent=new Intent(MainActivity.this,DoTheRender.class);
-        renderIntent.putExtra("string", tv.getText().toString());
-        rect=baseAPI.getWords().getBoxRects();
-        line_rect=baseAPI.getTextlines().getBoxRects();
-        //Rectangles = baseAPI.getTextlines().getBoxRects().toString();
-        Log.e("---RECTANGLES ARE ", "" + rect.toString());
-        Log.e("---Line Rectangles ARE ", "" + line_rect.toString());
+        renderIntent.putExtra("string", listOfTexts.toString());
 
-        //renderIntent.putExtra("Rectangles",Rectangles);
-        //renderIntent.putStringArrayListExtra("Rectangles",baseAPI.getWords().getBoxRects());
-        //renderIntent.putExtra("FirstRectangle",baseAPI.getWords().getBoxRects().get(0).toString());
         startActivity(renderIntent);
     }
 
@@ -312,6 +275,23 @@ public class MainActivity extends ActionBarActivity {
 
         @Override
         protected Integer doInBackground(Void... params) {
+            try {
+
+                //baseAPI.setPageSegMode(3);
+                rect = baseAPI.getWords().getBoxRects();
+                line_rect = baseAPI.getTextlines().getBoxRects();
+
+                //here i indicates the no of lines
+                //here we confine the rectangle to a specific bound so that we can get the text in different lines to render
+                for (int i = 0; i < line_rect.size(); i++) {
+                    baseAPI.setImage(currentBitmap);
+                    baseAPI.setRectangle(line_rect.get(i).left, line_rect.get(i).top, line_rect.get(i).width(), line_rect.get(i).height());
+                    listOfTexts.add(baseAPI.getUTF8Text());
+                }
+            }
+            catch (Exception exception){
+                Log.getStackTraceString(exception);
+            }
             return null;
         }
     }
