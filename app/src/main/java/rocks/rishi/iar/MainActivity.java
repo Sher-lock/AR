@@ -70,6 +70,8 @@ public class MainActivity extends ActionBarActivity {
 
     private Uri fileUri; // file url to store image/video
     private static final int CAMERA_CAPTURE_IMAGE_REQUEST_CODE = 100;
+
+
     //public static String Rectangles;
     private BaseLoaderCallback mOpenCVCallBack = new
             BaseLoaderCallback(this) {
@@ -136,8 +138,9 @@ public class MainActivity extends ActionBarActivity {
         File externalStorageDirectory = Environment.getExternalStorageDirectory();
 
         //to increase the accuracy of tesseract OEM_TESSERACT_CUBE_COMBINED is used
-       baseAPI.init(externalStorageDirectory+"/tesseract/", "hin",TessBaseAPI.OEM_TESSERACT_CUBE_COMBINED);
-         //baseAPI.init("/storage/9016-4EF8/tesseract/", "hin",TessBaseAPI.OEM_TESSERACT_CUBE_COMBINED);
+
+       baseAPI.init("/storage/sdcard1/tesseract/", "hin",TessBaseAPI.OEM_TESSERACT_CUBE_COMBINED);
+      //baseAPI.init("/storage/9016-4EF8/tesseract/", "hin",TessBaseAPI.OEM_TESSERACT_CUBE_COMBINED);
        //baseAPI.init("/storage/sdcard1/tesseract/", "hin",TessBaseAPI.OEM_TESSERACT_CUBE_COMBINED);
         Log.e("in Mainactivity", "on create");
 
@@ -284,9 +287,10 @@ public class MainActivity extends ActionBarActivity {
         baseAPI.setPageSegMode(3);
         baseAPI.setImage(currentBitmap);
         tv.setText(baseAPI.getUTF8Text());
+
         Log.e("this is the text",""+tv.getText().toString());
         Log.d("HINDI=====>>", tv.getText().toString());
-//
+
         ByteArrayOutputStream bs = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.PNG, 50, bs);
 
@@ -299,11 +303,17 @@ public class MainActivity extends ActionBarActivity {
         Log.e("---Line Rectangles ARE ", "" + line_rect.toString());
 
         //renderIntent.putExtra("Rectangles",Rectangles);
-
-
-       // renderIntent.putStringArrayListExtra("Rectangles",baseAPI.getWords().getBoxRects());
-        renderIntent.putExtra("FirstRectangle",baseAPI.getWords().getBoxRects().get(0).toString());
+        //renderIntent.putStringArrayListExtra("Rectangles",baseAPI.getWords().getBoxRects());
+        //renderIntent.putExtra("FirstRectangle",baseAPI.getWords().getBoxRects().get(0).toString());
         startActivity(renderIntent);
+    }
+
+    public class ExtractText extends AsyncTask<Void, Void,Integer>{
+
+        @Override
+        protected Integer doInBackground(Void... params) {
+            return null;
+        }
     }
 
     public void preProcess(){

@@ -28,8 +28,6 @@ public class DoTheRender extends RajawaliActivity{
     private Renderer mRenderer;
     private String text,FirstRectangle;
     private ArrayList<android.graphics.Rect> rect,line_rect;
-    private TextView custText;
-    private RelativeLayout childRelativeLayout;
     private String translateText;
     @Override
     public void onCreate(Bundle savedInstanceState)
@@ -48,20 +46,15 @@ public class DoTheRender extends RajawaliActivity{
         text=intent.getStringExtra("string");
         rect=MainActivity.getRectangles();
         line_rect=MainActivity.getLineRectangles();
-        FirstRectangle=intent.getStringExtra("FirstRectangle");
+        //FirstRectangle=intent.getStringExtra("FirstRectangle");
         mRenderer = new Renderer(this,bitmap,text,rect,line_rect);
         mRenderer.setSurfaceView(mSurfaceView);
-        //mLayout.addView(customView);
-
-//        LayoutInflater inflater = getLayoutInflater();
-//        getWindow().addContentView(inflater.inflate(R.layout.custom_view, null),
-//                new ViewGroup.LayoutParams(
-//                        ViewGroup.LayoutParams.FILL_PARENT,
-//                        ViewGroup.LayoutParams.FILL_PARENT));
 
         super.setRenderer(mRenderer);
 
-        new renderTask().execute();
+        //take each rectangle and then perform the operation of rendering
+        for(int i=0;i<line_rect.size();i++)
+            new RenderTask(i).execute();
 
 
     }
@@ -76,13 +69,28 @@ public class DoTheRender extends RajawaliActivity{
         return (int) (px / Resources.getSystem().getDisplayMetrics().density);
     }
 
-    private class renderTask extends AsyncTask<Void, Void,Integer> {
+    private class RenderTask extends AsyncTask<Void, Void,Integer> {
+        int rectangleNumber;
+        //text view that to be added to the parent view
+        private TextView custText;
+
+        // child layout
+        private RelativeLayout childRelativeLayout;
+
+        RenderTask(Integer rectNo){
+            rectangleNumber=rectNo;
+        }
 
         @Override
         protected Integer doInBackground(Void... params) {
+            //id for translation
             Translate.setClientId("IndiAR");
             Translate.setClientSecret("63KlfJGAQAW8i/q1RWJjm+1qFzgYXQ3gBt7PSjhQqKs=");
+
+            //set the background color
             Renderer.getBackgroundColor();
+
+            //set the background
             Renderer.colorForText();
             try {
                 Log.e("before translation= ",""+text);
@@ -114,26 +122,24 @@ public class DoTheRender extends RajawaliActivity{
             RelativeLayout.LayoutParams rlp=new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,ViewGroup.LayoutParams.WRAP_CONTENT);
 
             custText.setText(translateText);
-            custText.setTextSize(pxToDp((line_rect.get(0).bottom - line_rect.get(0).top)));
+            custText.setTextSize(pxToDp((line_rect.get(rectangleNumber).bottom - line_rect.get(rectangleNumber).top)));
 
-            rlp.setMargins((line_rect.get(0).left), (line_rect.get(0).top), (line_rect.get(0).right),
-                    (line_rect.get(0).bottom));
+            rlp.setMargins((line_rect.get(rectangleNumber).left), (line_rect.get(rectangleNumber).top), (line_rect.get(rectangleNumber).right),
+                    (line_rect.get(rectangleNumber).bottom));
             //childRelativeLayout.setPadding();
-            rlp.setMarginStart((line_rect.get(0).left));
+            rlp.setMarginStart((line_rect.get(rectangleNumber).left));
 
-            //childRelativeLayout.getLayoutParams().height=(line_rect.get(0).bottom-line_rect.get(0).top);
-          //  childRelativeLayout.getLayoutParams().width=(line_rect.get(0).right-line_rect.get(0).left);
             childRelativeLayout.setBackgroundColor(Renderer.getBackgroundColor());
             custText.setTextColor(Color.BLACK);
 
             Log.e("Renderer back check", Renderer.getBackgroundColor() + "");
             Log.e("Renderer front check", Renderer.colorForText()+ "");
 
-            if(childRelativeLayout.getLayoutParams().width<(line_rect.get(0).right-line_rect.get(0).left))
-                childRelativeLayout.setMinimumWidth(line_rect.get(0).right-line_rect.get(0).left);
+            if(childRelativeLayout.getLayoutParams().width<(line_rect.get(rectangleNumber).right-line_rect.get(rectangleNumber).left))
+                childRelativeLayout.setMinimumWidth(line_rect.get(rectangleNumber).right-line_rect.get(rectangleNumber).left);
 
-            if(childRelativeLayout.getTop()<(line_rect.get(0).top))
-                childRelativeLayout.setMinimumHeight((line_rect.get(0).top - childRelativeLayout.getTop()) + line_rect.get(0).bottom - line_rect.get(0).top);
+            if(childRelativeLayout.getTop()<(line_rect.get(rectangleNumber).top))
+                childRelativeLayout.setMinimumHeight((line_rect.get(rectangleNumber).top - childRelativeLayout.getTop()) + line_rect.get(rectangleNumber).bottom - line_rect.get(rectangleNumber).top);
 
 
             //childRelativeLayout.setBackgroundColor(Color.BLACK);
