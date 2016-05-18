@@ -5,10 +5,13 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Rect;
 import java.util.Date;
+import java.util.Iterator;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.provider.MediaStore;
+import org.opencv.core.Scalar;
+
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
@@ -20,18 +23,16 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
-
 import com.googlecode.tesseract.android.TessBaseAPI;
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
+import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.Point;
-import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import java.io.ByteArrayInputStream;
@@ -42,7 +43,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.Locale;
 
 public class MainActivity extends ActionBarActivity {
@@ -64,13 +64,8 @@ public class MainActivity extends ActionBarActivity {
     private static ArrayList<Rect> rect,line_rect;
     private static ArrayList<String> listOfTexts;
 
-    private Mat newImg;
-    //contains many parameter example number of contours etc
-
     private Uri fileUri; // file url to store image/video
     private static final int CAMERA_CAPTURE_IMAGE_REQUEST_CODE = 100;
-
-
     //public static String Rectangles;
     private BaseLoaderCallback mOpenCVCallBack = new
             BaseLoaderCallback(this) {
@@ -79,24 +74,25 @@ public class MainActivity extends ActionBarActivity {
                     switch (status) {
                         case LoaderCallbackInterface.SUCCESS:
 
-                        break;
+                            break;
                         default:
                             super.onManagerConnected(status);
                             break;
                     }
                 }
             };
+//    static{
+//        if (!OpenCVLoader.initDebug()) {
+//            // Handle initialization error
+//            Log.i(TAG, "OpenCVLoader Failed");
+//        } else {
+//            Log.i(TAG, "OpenCVLoader Succeeded");
+//            System.loadLibrary("CameraVision");
+//            System.loadLibrary("opencv_java3");
+//        }
+//    }
 
-    protected void onSaveInstanceState(Bundle outState) {
-        outState.putInt("param", 1);
-        super.onSaveInstanceState(outState);
-    }
 
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        int param;
-        param = savedInstanceState.getInt("param");
-        super.onRestoreInstanceState(savedInstanceState);
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -117,15 +113,15 @@ public class MainActivity extends ActionBarActivity {
         screenH = (float) size.y;
 
 
+
         tv=(TextView)findViewById(R.id.marathi);
         baseAPI = new TessBaseAPI();
         File externalStorageDirectory = Environment.getExternalStorageDirectory();
 
         //to increase the accuracy of tesseract OEM_TESSERACT_CUBE_COMBINED is used
-
-       baseAPI.init("/storage/sdcard1/tesseract/", "hin",TessBaseAPI.OEM_TESSERACT_CUBE_COMBINED);
-      //baseAPI.init("/storage/9016-4EF8/tesseract/", "hin",TessBaseAPI.OEM_TESSERACT_CUBE_COMBINED);
-      //baseAPI.init("/storage/sdcard1/tesseract/", "hin",TessBaseAPI.OEM_TESSERACT_CUBE_COMBINED);
+         baseAPI.init(externalStorageDirectory+"/tesseract/", "hin",TessBaseAPI.OEM_TESSERACT_CUBE_COMBINED);
+        //baseAPI.init("/storage/9016-4EF8/tesseract/", "hin",TessBaseAPI.OEM_TESSERACT_CUBE_COMBINED);
+        //baseAPI.init("/storage/sdcard1/tesseract/", "hin",TessBaseAPI.OEM_TESSERACT_CUBE_COMBINED);
         Log.e("in Mainactivity", "on create");
 
         //this if the user chooses a photo from gallery
@@ -146,6 +142,17 @@ public class MainActivity extends ActionBarActivity {
 
             @Override
             public void onClick(View v) {
+                /*String filename = System.currentTimeMillis() + ".jpg";
+
+                ContentValues values = new ContentValues();
+                values.put(MediaStore.Images.Media.TITLE, filename);
+                values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
+                imageUri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+
+                Intent intent = new Intent();
+                intent.setAction(MediaStore.ACTION_IMAGE_CAPTURE);
+                intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
+                startActivityForResult(intent, REQUEST_CAMERA);*/
                 captureImage();
             }
         });
@@ -156,6 +163,14 @@ public class MainActivity extends ActionBarActivity {
             }
         });
         img=(ImageView)findViewById(R.id.inter);
+    }
+
+    public class Preprocessing extends AsyncTask<Void,Void,Void>{
+        protected Void doInBackground(Void... urls)
+        {
+            preProcess();
+            return null;
+        }
     }
 
     public Uri getOutputMediaFileUri(int type) {
@@ -250,50 +265,53 @@ public class MainActivity extends ActionBarActivity {
         return screenW;
     }
 
+
     public static ArrayList<String> getListOfTexts(){
         return listOfTexts;
     }
 
+
     private void inspectFromBitmap() {
-        baseAPI.setPageSegMode(100);
+
+        Log.e("in Mainactivity", "inspect from bitmap");
+
+        //this tells how much processing the tesseract will have to perform berfore recognizing the text
+        baseAPI.setPageSegMode(100);//100
         baseAPI.setPageSegMode(3);
         baseAPI.setImage(currentBitmap);
-        Log.e("THIS IS THE ERROR", baseAPI.getUTF8Text());
-
-        new ExtractText().execute();
-        Log.e("rect and line of rect",rect.toString()+" "+line_rect.toString());
+        tv.setText(baseAPI.getUTF8Text());
+        Log.e("this is the text",""+tv.getText().toString());
+        Log.d("HINDI=====>>", tv.getText().toString());
+//
         ByteArrayOutputStream bs = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.PNG, 50, bs);
 
         Intent renderIntent=new Intent(MainActivity.this,DoTheRender.class);
+        renderIntent.putExtra("string", tv.getText().toString());
         renderIntent.putExtra("string", listOfTexts.toString());
 
-        startActivity(renderIntent);
-    }
 
-    public class ExtractText extends AsyncTask<Void, Void,Integer>{
+        rect=baseAPI.getWords().getBoxRects();
+        line_rect=baseAPI.getTextlines().getBoxRects();
 
-        @Override
-        protected Integer doInBackground(Void... params) {
-            try {
-
-                //baseAPI.setPageSegMode(3);
-                rect = baseAPI.getWords().getBoxRects();
-                line_rect = baseAPI.getTextlines().getBoxRects();
-
-                //here i indicates the no of lines
-                //here we confine the rectangle to a specific bound so that we can get the text in different lines to render
-                for (int i = 0; i < line_rect.size(); i++) {
-                    baseAPI.setImage(currentBitmap);
-                    baseAPI.setRectangle(line_rect.get(i).left, line_rect.get(i).top, line_rect.get(i).width(), line_rect.get(i).height());
-                    listOfTexts.add(baseAPI.getUTF8Text());
-                }
-            }
-            catch (Exception exception){
-                Log.getStackTraceString(exception);
-            }
-            return null;
+        for (int i = 0; i < line_rect.size(); i++) {
+            baseAPI.setImage(currentBitmap);
+            baseAPI.setRectangle(line_rect.get(i).left, line_rect.get(i).top, line_rect.get(i).width(), line_rect.get(i).height());
+            listOfTexts.add(baseAPI.getUTF8Text());
         }
+
+        //Rectangles = baseAPI.getTextlines().getBoxRects().toString();
+        Log.e("---RECTANGLES ARE ", "" + rect.toString());
+        Log.e("---Line Rectangles ARE ", "" + line_rect.toString());
+        Log.e("---RECTANGLES ARE ", "" + listOfTexts.toString());
+
+
+        //renderIntent.putExtra("Rectangles",Rectangles);
+
+
+        // renderIntent.putStringArrayListExtra("Rectangles",baseAPI.getWords().getBoxRects());
+       // renderIntent.putExtra("FirstRectangle",baseAPI.getWords().getBoxRects().get(0).toString());
+        startActivity(renderIntent);
     }
 
     public void preProcess(){
@@ -314,7 +332,7 @@ public class MainActivity extends ActionBarActivity {
 
 
             Log.e("in Mainactivity", "Here we go");
-           //Imgproc.threshold(grayMat, grayMat, 50, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C);
+            //Imgproc.threshold(grayMat, grayMat, 50, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C);
 
             //Converting Mat back to Bitmap
             //This is the previous mat which is converted to bitmap
@@ -354,9 +372,9 @@ public class MainActivity extends ActionBarActivity {
             Imgproc.threshold(nextMat, nextMat, 30, 255, Imgproc.THRESH_BINARY_INV);
             Utils.matToBitmap(nextMat,newBitmap);
 //            currentBitmap = Bitmap.createScaledBitmap(currentBitmap, (int) screenW, (int) screenH, true);
-          //  currentBitmap=Bitmap.createScaledBitmap(currentBitmap, (int) screenW, (int) screenH, true);
+            //  currentBitmap=Bitmap.createScaledBitmap(currentBitmap, (int) screenW, (int) screenH, true);
             newBitmap=Bitmap.createScaledBitmap(newBitmap, (int) screenW, (int) screenH, true);
-           currentBitmap=newBitmap;
+            currentBitmap=newBitmap;
 
         }catch(Exception ex){
 
@@ -375,6 +393,31 @@ public class MainActivity extends ActionBarActivity {
     }
 
 
+    //sobel
+    public void sobel(Mat temp){
+        Mat grayMat = temp;
+        Mat sobel = new Mat(); //Mat to store the result
+        //Mat to store gradient and absolute gradient respectively
+        Mat grad_x = new Mat();
+        Mat abs_grad_x = new Mat();
+        Mat grad_y = new Mat();
+        Mat abs_grad_y = new Mat();
+
+        //Calculating gradient in horizontal direction
+        Imgproc.Sobel(grayMat, grad_x, CvType.CV_16S, 1, 0, 3, 1, 0);
+        //Calculating gradient in vertical direction
+        Imgproc.Sobel(grayMat, grad_y, CvType.CV_16S, 0, 1, 3, 1, 0);
+        //Calculating absolute value of gradients in both the direction
+        Core.convertScaleAbs(grad_x, abs_grad_x);
+        Core.convertScaleAbs(grad_y, abs_grad_y);
+        //Calculating the resultant gradient
+        Core.addWeighted(abs_grad_x, 0.5,
+                abs_grad_y, 0.5, 1, sobel);
+//Converting Mat back to Bitmap
+        Utils.matToBitmap(sobel, currentBitmap);
+        img.setImageBitmap(currentBitmap);
+
+    }
     private void inspect(Uri uri) {
         InputStream is = null;
         try {
@@ -383,8 +426,8 @@ public class MainActivity extends ActionBarActivity {
 
             is = getContentResolver().openInputStream(uri);
             BitmapFactory.Options options = new BitmapFactory.Options();
-           // options.inPreferredConfig = Bitmap.Config.RGB_565;
-           // options.inSampleSize = 2;
+            // options.inPreferredConfig = Bitmap.Config.RGB_565;
+            // options.inSampleSize = 2;
             options.inDither = true;
             options.inScreenDensity = DisplayMetrics.DENSITY_LOW;
             bitmap = BitmapFactory.decodeStream(is, null, options);
@@ -399,19 +442,17 @@ public class MainActivity extends ActionBarActivity {
             originalMat = new Mat(tempBitmap.getHeight(), tempBitmap.getWidth(), CvType.CV_8U);
             Utils.bitmapToMat(tempBitmap, originalMat);
             currentBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, false);
-            newBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, false);
-
             bitmap = Bitmap.createScaledBitmap(bitmap, (int) screenW, (int) screenH, true);
 
             //preProcess();
             try {
-                new PreProcessing().execute();
-                //preProcess();
+                //new Preprocessing().execute();
+                preProcess();
             }
             catch(Exception ex){
                 Log.e("YOUR ERROR IS\n\n\n\n\n\n ",Log.getStackTraceString(ex));
             }
-            //inspectFromBitmap();
+            inspectFromBitmap();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } finally {
@@ -423,26 +464,7 @@ public class MainActivity extends ActionBarActivity {
             }
         }
     }
-    class PreProcessing extends AsyncTask<Void,Void,Integer>{
 
-        @Override
-        protected Integer doInBackground(Void... params) {
-            try {
-
-                preProcess();
-            }
-            catch(Exception ex){
-                Log.e("YOUR ERROR IS\n\n\n\n\n\n ",Log.getStackTraceString(ex));
-            }
-
-            return null;
-        }
-        @Override
-        protected void onPostExecute(Integer i) {
-            img.setImageBitmap(currentBitmap);
-            inspectFromBitmap();
-        }
-    }
     //do the operation after selecting the image
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
