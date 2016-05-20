@@ -28,9 +28,8 @@ public class DoTheRender extends RajawaliActivity{
     private Renderer mRenderer;
     private String text;
     private ArrayList<android.graphics.Rect> rect,line_rect;
-    private String translateText;
+    //private String translateText;
     private ArrayList<String> listOfText;
-
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
@@ -48,18 +47,31 @@ public class DoTheRender extends RajawaliActivity{
         text=intent.getStringExtra("string");
         rect=MainActivity.getRectangles();
         line_rect=MainActivity.getLineRectangles();
-        mRenderer = new Renderer(this,bitmap,text,rect,line_rect);
+        listOfText=MainActivity.getListOfTexts();
+        Log.e("rect values",rect.toString());
+        Log.e("line rect value",line_rect.toString());
+
+        mRenderer = new Renderer(this,bitmap,text);
         mRenderer.setSurfaceView(mSurfaceView);
 
         super.setRenderer(mRenderer);
+        //id for translation
+        Log.e("Yo dude"," its working===========");
+        Translate.setClientId("IndiAR");
+        Translate.setClientSecret("63KlfJGAQAW8i/q1RWJjm+1qFzgYXQ3gBt7PSjhQqKs=");
 
         //take each rectangle and then perform the operation of rendering
-        for(int i=0;i<line_rect.size();i++)
+        for(int i=0;i<line_rect.size();i++) {
             new RenderTask(i).execute();
+        }
 
 
     }
-
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+        listOfText.clear();
+    }
     public static int dpToPx(int dp)
     {
         return (int) (dp * Resources.getSystem().getDisplayMetrics().density);
@@ -84,20 +96,11 @@ public class DoTheRender extends RajawaliActivity{
 
         @Override
         protected Integer doInBackground(Void... params) {
-            //id for translation
-            Translate.setClientId("IndiAR");
-            Translate.setClientSecret("63KlfJGAQAW8i/q1RWJjm+1qFzgYXQ3gBt7PSjhQqKs=");
-
-            //set the background color
-            Renderer.getBackgroundColor();
-
-            //set the background
-            Renderer.colorForText();
             try {
-                Log.e("before translation= ",""+text);
-
-                translateText=Translate.execute(text, Language.HINDI,Language.ENGLISH);
-                Log.e("after translation= ",""+translateText);
+                Log.e("before translation= ", "" + listOfText.toString());
+                for(int i=0;i<listOfText.size();i++)
+                    listOfText.set(i,Translate.execute(listOfText.get(i), Language.HINDI,Language.ENGLISH));
+                Log.e("after translation= ",""+listOfText.toString());
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -109,6 +112,15 @@ public class DoTheRender extends RajawaliActivity{
         }
         @Override
         protected void onPostExecute(Integer x){
+            //here we create a child view and add it on the parent view which already contains surface view
+            //as seen in Rajawali activity which has its own frame layout which confines the surface view
+            //so the rendering stuff can still be carried out on surface view while we make multiple child element
+            //and it to the parent element
+            Log.e("in post execute"," its working===========");
+            Log.e("rect ",rect.toString());
+            Log.e("line of rect",line_rect.toString());
+            Log.e("list of text", listOfText.get(rectangleNumber).toString());
+
             //here we create a child view and add it on the parent view which already contains surface view
             //as seen in Rajawali activity which has its own frame layout which confines the surface view
             //so the rendering stuff can still be carried out on surface view while we make multiple child element
@@ -130,11 +142,13 @@ public class DoTheRender extends RajawaliActivity{
             //childRelativeLayout.setPadding();
             rlp.setMarginStart((line_rect.get(rectangleNumber).left));
 
-            childRelativeLayout.setBackgroundColor(Renderer.getBackgroundColor());
+            //childRelativeLayout.getLayoutParams().height=(line_rect.get(0).bottom-line_rect.get(0).top);
+            //  childRelativeLayout.getLayoutParams().width=(line_rect.get(0).right-line_rect.get(0).left);
+            childRelativeLayout.setBackgroundColor(Renderer.getBackgroundColor(line_rect.get(rectangleNumber)));
             custText.setTextColor(Color.BLACK);
 
-            Log.e("Renderer back check", Renderer.getBackgroundColor() + "");
-            Log.e("Renderer front check", Renderer.colorForText()+ "");
+            //Log.e("Renderer back check", Renderer.getBackgroundColor() + "");
+            //Log.e("Renderer front check", Renderer.colorForText()+ "");
 
             if(childRelativeLayout.getLayoutParams().width<(line_rect.get(rectangleNumber).right-line_rect.get(rectangleNumber).left))
                 childRelativeLayout.setMinimumWidth(line_rect.get(rectangleNumber).right-line_rect.get(rectangleNumber).left);
